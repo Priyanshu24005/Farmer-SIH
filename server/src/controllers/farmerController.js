@@ -23,7 +23,7 @@ export const getFarmers = async (req, res) => {
 // Get single farmer by ID
 export const getFarmerById = async (req, res) => {
   try {
-    const farmer = await Farmer.findById(req.params.id);
+    const farmer = await Farmer.findById(req.params.id).select('-password');
     if (!farmer) return res.status(404).json({ message: 'Farmer not found' });
     res.status(200).json(farmer);
   } catch (error) {

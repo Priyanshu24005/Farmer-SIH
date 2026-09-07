@@ -3,6 +3,8 @@ import cors from 'cors';
 import connectDB from './config/db.js';
 import farmerRoutes from './routes/FarmerRoutes.js';
 import mandiRoutes from './routes/MandiRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+
 
 const app = express();
 
@@ -17,5 +19,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/farmers', farmerRoutes);
 app.use('/api/mandis', mandiRoutes);
+app.use('/api/auth', authRoutes);
+
 
 export default app;
