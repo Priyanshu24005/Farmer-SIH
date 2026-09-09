@@ -1,11 +1,20 @@
-import React from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+import MandiManagement from "./pages/admin/MandiManagement";
 
 const App = () => {
   return (
-    <div>
-      <h1>App</h1>
-    </div>
-  )
-}
+    <BrowserRouter>
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar newestOnTop />
 
-export default App
+      <Routes>
+        <Route path="/" element={<Navigate to="/admin/mandis" replace />} />
+        <Route path="/admin/mandis" element={<MandiManagement />} />
+      </Routes>
+    </BrowserRouter>
+  );
+};
+
+export default App;
