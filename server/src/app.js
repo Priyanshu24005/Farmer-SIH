@@ -5,6 +5,8 @@ import farmerRoutes from './routes/farmerRoutes.js';
 import mandiRoutes from './routes/mandiRoutes.js';
 import tokenRoutes from './routes/tokenRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
+
 
 const app = express();
 
@@ -21,5 +23,7 @@ app.use('/api/farmers', farmerRoutes);
 app.use('/api/mandis', mandiRoutes);
 app.use('/api/tokens', tokenRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/payments', paymentRoutes);
+
 
 export default app;
