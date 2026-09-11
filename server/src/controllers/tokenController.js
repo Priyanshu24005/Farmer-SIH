@@ -6,6 +6,10 @@ export const bookToken = async (req, res) => {
   try {
     const { farmer, mandi, date } = req.body;
 
+    if (!farmer || !mandi || !date) {
+      return res.status(400).json({ message: 'farmer, mandi, and date are all required' });
+    }
+
     const mandiData = await Mandi.findById(mandi);
     if (!mandiData) return res.status(404).json({ message: 'Mandi not found' });
 

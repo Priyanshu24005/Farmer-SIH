@@ -1,17 +1,20 @@
 import Payment from '../models/Payment.js';
 import Token from '../models/Token.js';
 
-// Rate per kg based on quality grade (simple example, adjust as needed)
 const RATE_PER_KG = {
   A: 25,
   B: 20,
   C: 15
 };
 
-// Create payment record (called when marking a token as served, with procurement details)
+// Create payment record
 export const createPayment = async (req, res) => {
   try {
     const { token, quantityKg, qualityGrade } = req.body;
+
+    if (!token || !quantityKg || !qualityGrade) {
+      return res.status(400).json({ message: 'token, quantityKg, and qualityGrade are all required' });
+    }
 
     const tokenData = await Token.findById(token);
     if (!tokenData) return res.status(404).json({ message: 'Token not found' });
@@ -28,7 +31,6 @@ export const createPayment = async (req, res) => {
       amount
     });
 
-    // Mark the token as served once procurement is logged
     tokenData.status = 'served';
     await tokenData.save();
 
@@ -94,7 +96,7 @@ export const markPaymentPaid = async (req, res) => {
   }
 };
 
-// Get payment history for a farmer (via their tokens)
+// Get payment history for a farmer
 export const getFarmerPayments = async (req, res) => {
   try {
     const { farmerId } = req.params;
