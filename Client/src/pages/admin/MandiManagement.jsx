@@ -121,43 +121,43 @@ export default function MandiManagement() {
       actions={
         <button
           onClick={openCreateModal}
-          className="flex items-center gap-2 bg-[#1E4635] text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-[#173627] transition-colors"
+          className="flex items-center gap-2 bg-primary text-on-primary px-4 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity"
         >
           <Plus size={16} />
           Add mandi
         </button>
       }
     >
-      <p className="text-gray-500 -mt-4 mb-6">
+      <p className="text-muted -mt-4 mb-6">
         Add and edit mandis, and set each one's daily procurement capacity.
       </p>
 
-      <div className="bg-white rounded-2xl border border-black/5 overflow-hidden">
-        <div className="p-4 border-b border-black/5">
+      <div className="bg-surface rounded-2xl border border-border overflow-hidden">
+        <div className="p-4 border-b border-border">
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search name, location..."
-            className="w-full max-w-sm px-4 py-2.5 rounded-xl bg-[#F5F3EC] text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E4635]/20"
+            className="w-full max-w-sm px-4 py-2.5 rounded-xl bg-surface-soft text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
 
         {loading ? (
           <div className="p-8 space-y-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-14 rounded-xl bg-gray-100 animate-pulse" />
+              <div key={i} className="h-14 rounded-xl bg-surface-soft animate-pulse" />
             ))}
           </div>
         ) : filteredMandis.length === 0 ? (
           <div className="p-12 flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-full bg-[#F0E6D2] flex items-center justify-center mb-3">
-              <MapPin size={20} className="text-[#1E4635]" />
+            <div className="w-12 h-12 rounded-full bg-accent-soft flex items-center justify-center mb-3">
+              <MapPin size={20} className="text-sidebar" />
             </div>
-            <p className="font-semibold text-gray-900">
+            <p className="font-display font-semibold text-ink text-lg">
               {search ? "No matching mandis" : "No mandis yet"}
             </p>
-            <p className="text-gray-500 text-sm mt-1">
+            <p className="text-muted text-sm mt-1">
               {search
                 ? "Try a different name or location."
                 : "Add your first mandi to start managing its queue."}
@@ -166,7 +166,7 @@ export default function MandiManagement() {
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-gray-500 bg-[#F5F3EC]/60">
+              <tr className="text-left text-muted bg-surface-soft">
                 <th className="font-medium px-6 py-3">Mandi</th>
                 <th className="font-medium px-6 py-3">Location</th>
                 <th className="font-medium px-6 py-3">Daily capacity</th>
@@ -175,26 +175,26 @@ export default function MandiManagement() {
             </thead>
             <tbody>
               {filteredMandis.map((mandi) => (
-                <tr key={mandi._id} className="border-t border-black/5">
-                  <td className="px-6 py-4 font-medium text-gray-900">
+                <tr key={mandi._id} className="border-t border-border">
+                  <td className="px-6 py-4 font-medium text-ink">
                     {mandi.name}
                   </td>
-                  <td className="px-6 py-4 text-gray-600">{mandi.location}</td>
-                  <td className="px-6 py-4 text-gray-600">
+                  <td className="px-6 py-4 text-muted">{mandi.location}</td>
+                  <td className="px-6 py-4 text-muted">
                     {mandi.dailyCapacity} tokens/day
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => openEditModal(mandi)}
-                        className="p-2 rounded-lg hover:bg-[#F5F3EC] text-gray-500 hover:text-[#1E4635]"
+                        className="p-2 rounded-lg hover:bg-surface-soft text-muted hover:text-accent"
                         aria-label={`Edit ${mandi.name}`}
                       >
                         <Pencil size={16} />
                       </button>
                       <button
                         onClick={() => setDeleteTarget(mandi)}
-                        className="p-2 rounded-lg hover:bg-red-50 text-gray-500 hover:text-red-600"
+                        className="p-2 rounded-lg hover:bg-red-50 text-muted hover:text-red-600"
                         aria-label={`Delete ${mandi.name}`}
                       >
                         <Trash2 size={16} />
@@ -210,19 +210,19 @@ export default function MandiManagement() {
 
       {modalOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6">
+          <div className="bg-surface rounded-2xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="font-display text-lg font-semibold text-ink">
                 {editingId ? "Edit mandi" : "Add mandi"}
               </h2>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
+              <button onClick={closeModal} className="text-muted hover:text-ink">
                 <X size={18} />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-ink mb-1">
                   Mandi name
                 </label>
                 <input
@@ -230,11 +230,11 @@ export default function MandiManagement() {
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="e.g. Meerut Mandi"
-                  className="w-full px-4 py-2.5 rounded-xl bg-[#F5F3EC] text-sm focus:outline-none focus:ring-2 focus:ring-[#1E4635]/20"
+                  className="w-full px-4 py-2.5 rounded-xl bg-surface-soft text-sm text-ink focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-ink mb-1">
                   Location
                 </label>
                 <input
@@ -244,11 +244,11 @@ export default function MandiManagement() {
                     setForm({ ...form, location: e.target.value })
                   }
                   placeholder="e.g. Meerut, UP"
-                  className="w-full px-4 py-2.5 rounded-xl bg-[#F5F3EC] text-sm focus:outline-none focus:ring-2 focus:ring-[#1E4635]/20"
+                  className="w-full px-4 py-2.5 rounded-xl bg-surface-soft text-sm text-ink focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-ink mb-1">
                   Daily capacity (tokens)
                 </label>
                 <input
@@ -259,7 +259,7 @@ export default function MandiManagement() {
                     setForm({ ...form, dailyCapacity: e.target.value })
                   }
                   placeholder="e.g. 100"
-                  className="w-full px-4 py-2.5 rounded-xl bg-[#F5F3EC] text-sm focus:outline-none focus:ring-2 focus:ring-[#1E4635]/20"
+                  className="w-full px-4 py-2.5 rounded-xl bg-surface-soft text-sm text-ink focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
 
@@ -267,14 +267,14 @@ export default function MandiManagement() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50"
+                  className="flex-1 py-2.5 rounded-xl border border-border text-sm font-medium text-muted hover:bg-surface-soft"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 py-2.5 rounded-xl bg-[#1E4635] text-white text-sm font-medium hover:bg-[#173627] disabled:opacity-60"
+                  className="flex-1 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-medium hover:opacity-90 disabled:opacity-50"
                 >
                   {saving ? "Saving..." : editingId ? "Save changes" : "Create mandi"}
                 </button>
@@ -286,19 +286,21 @@ export default function MandiManagement() {
 
       {deleteTarget && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm p-6 text-center">
+          <div className="bg-surface rounded-2xl w-full max-w-sm p-6 text-center">
             <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
               <Trash2 size={20} className="text-red-500" />
             </div>
-            <h2 className="font-semibold text-gray-900 mb-1">Delete mandi?</h2>
-            <p className="text-sm text-gray-500 mb-5">
+            <h2 className="font-display font-semibold text-ink mb-1">
+              Delete mandi?
+            </h2>
+            <p className="text-sm text-muted mb-5">
               This removes <span className="font-medium">{deleteTarget.name}</span> and
               can't be undone. Any active queue for it should be cleared first.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteTarget(null)}
-                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50"
+                className="flex-1 py-2.5 rounded-xl border border-border text-sm font-medium text-muted hover:bg-surface-soft"
               >
                 Cancel
               </button>

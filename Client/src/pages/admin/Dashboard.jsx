@@ -4,23 +4,18 @@ import AdminLayout from "../../components/admin/AdminLayout";
 import { getFarmers } from "../../api/admin/farmer";
 import { getMandis } from "../../api/admin/mandi";
 
-// Placeholder trend data for the activity chart — your project doesn't
-// have an analytics endpoint yet, so this is just illustrative. Swap
-// `chartData` for real numbers once that API exists.
 const chartData = [40, 55, 48, 70, 65, 90];
 const chartLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Today"];
 
 function StatCard({ label, value, hint, icon: Icon }) {
   return (
-    <div className="bg-white rounded-2xl border border-black/5 p-5">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-gray-500 text-sm">{label}</p>
-        <div className="w-9 h-9 rounded-lg bg-[#F0E6D2] flex items-center justify-center">
-          <Icon size={16} className="text-[#1E4635]" />
-        </div>
+    <div className="bg-surface rounded-2xl border border-border border-t-2 border-t-accent p-5">
+      <div className="flex items-center gap-2 mb-3">
+        <Icon size={15} className="text-accent" />
+        <p className="text-muted text-sm">{label}</p>
       </div>
-      <p className="text-3xl font-bold text-gray-900">{value}</p>
-      {hint && <p className="text-[#3E7A5C] text-sm mt-1">{hint}</p>}
+      <p className="font-display text-3xl font-semibold text-ink">{value}</p>
+      {hint && <p className="text-accent text-sm mt-1">{hint}</p>}
     </div>
   );
 }
@@ -64,21 +59,13 @@ export default function Dashboard() {
 
   return (
     <AdminLayout eyebrow={today} title={`Good morning, ${admin.name || "Admin"}`}>
-      <p className="text-gray-500 -mt-4 mb-6">
+      <p className="text-muted -mt-4 mb-6">
         Here's the latest pulse across Farmer-SIH.
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard
-          label="Total farmers"
-          value={loading ? "…" : farmerCount}
-          icon={Users}
-        />
-        <StatCard
-          label="Mandis registered"
-          value={loading ? "…" : mandiCount}
-          icon={Sprout}
-        />
+        <StatCard label="Total farmers" value={loading ? "…" : farmerCount} icon={Users} />
+        <StatCard label="Mandis registered" value={loading ? "…" : mandiCount} icon={Sprout} />
         <StatCard
           label="Pending requests"
           value="—"
@@ -94,17 +81,19 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-black/5 p-6">
-          <p className="font-semibold text-gray-900 mb-1">Platform activity</p>
-          <p className="text-gray-500 text-sm mb-6">
+        <div className="lg:col-span-2 bg-surface rounded-2xl border border-border p-6">
+          <p className="font-display font-semibold text-ink text-lg mb-1">
+            Platform activity
+          </p>
+          <p className="text-muted text-sm mb-6">
             Placeholder data — connect to a real analytics endpoint later.
           </p>
-                   <div className="flex flex-col">
+          <div className="flex flex-col">
             <div className="h-40 flex gap-4">
               {chartData.map((val, i) => (
                 <div key={i} className="flex-1 h-full flex items-end">
                   <div
-                    className="w-full rounded-t-lg bg-[#1E4635]/80"
+                    className="w-full rounded-t-lg bg-primary"
                     style={{ height: `${(val / maxVal) * 100}%` }}
                   />
                 </div>
@@ -112,7 +101,7 @@ export default function Dashboard() {
             </div>
             <div className="flex gap-4 mt-2">
               {chartLabels.map((label, i) => (
-                <span key={i} className="flex-1 text-center text-xs text-gray-400">
+                <span key={i} className="flex-1 text-center text-xs text-muted">
                   {label}
                 </span>
               ))}
@@ -120,32 +109,32 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-black/5 p-6">
-          <p className="font-semibold text-gray-900 mb-1">Review queue</p>
-          <p className="text-gray-500 text-sm mb-4">Items requiring attention</p>
+        <div className="bg-surface rounded-2xl border border-border p-6">
+          <p className="font-display font-semibold text-ink text-lg mb-1">
+            Review queue
+          </p>
+          <p className="text-muted text-sm mb-4">Items requiring attention</p>
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-gray-900 text-sm">Live queue</p>
-                <p className="text-gray-500 text-xs">Waiting farmers today</p>
+                <p className="font-medium text-ink text-sm">Live queue</p>
+                <p className="text-muted text-xs">Waiting farmers today</p>
               </div>
-              <span className="px-2.5 py-1 rounded-full bg-[#F5E3B3] text-xs font-medium text-gray-800">
+              <span className="px-2.5 py-1 rounded-full bg-accent-soft/20 text-xs font-medium text-ink">
                 —
               </span>
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-gray-900 text-sm">
-                  Support requests
-                </p>
-                <p className="text-gray-500 text-xs">Awaiting response</p>
+                <p className="font-medium text-ink text-sm">Support requests</p>
+                <p className="text-muted text-xs">Awaiting response</p>
               </div>
-              <span className="px-2.5 py-1 rounded-full bg-gray-100 text-xs font-medium text-gray-800">
+              <span className="px-2.5 py-1 rounded-full bg-surface-soft text-xs font-medium text-ink">
                 —
               </span>
             </div>
-            <p className="text-xs text-gray-400 pt-2 border-t border-black/5">
+            <p className="text-xs text-muted pt-2 border-t border-border">
               These will populate once the queue/support APIs are wired in.
             </p>
           </div>
