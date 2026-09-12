@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, Phone } from "lucide-react";
+import { ArrowRight, CheckCircle2, Phone, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 
 function HeroArtwork({ label, assurance, direct }) {
@@ -70,6 +70,10 @@ export default function FarmerHero({ copy }) {
         <Link className="farmer-primary-cta" to="/farmer/login">
           <span>{copy.loginCta}</span>
           <ArrowRight size={19} aria-hidden="true" />
+        </Link>
+        <Link className="farmer-secondary-cta" to="/admin/mandis">
+          <ShieldCheck size={19} aria-hidden="true" />
+          <span>{copy.adminLoginCta}</span>
         </Link>
         <div className="farmer-helpline">
           <span className="farmer-helpline__icon" aria-hidden="true"><Phone size={17} /></span>

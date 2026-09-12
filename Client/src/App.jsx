@@ -4,7 +4,6 @@ import "react-toastify/dist/ReactToastify.css";
 
 import MandiManagement from "./pages/admin/MandiManagement";
 import FarmerLogin from "./pages/farmer/FarmerLogin";
-import FarmerOtp from "./pages/farmer/FarmerOtp";
 import FarmerRegister from "./pages/farmer/FarmerRegister";
 import FarmerHome from "./pages/farmer/FarmerHome";
 import FarmerComingSoon from "./pages/farmer/FarmerComingSoon";
@@ -31,7 +30,6 @@ const App = () => {
         <Route path="/farmer" element={<FarmerHome />} />
         <Route path="/farmer/welcome" element={<FarmerWelcome />} />
         <Route path="/farmer/login" element={<FarmerLogin />} />
-        <Route path="/farmer/otp" element={<FarmerOtp />} />
         <Route path="/farmer/register" element={<FarmerRegister />} />
         <Route path="/farmer/book" element={<FarmerBookSlot />} />
         <Route path="/farmer/queue" element={<FarmerLiveQueue />} />
@@ -43,6 +41,11 @@ const App = () => {
         <Route path="/farmer/profile" element={<FarmerProfile />} />
         <Route path="/farmer/settings" element={<FarmerSettings />} />
         <Route path="/farmer/help" element={<FarmerHelp />} />
+        {/* Farmer-scoped fallback: the removed /farmer/otp route and any other
+            unknown /farmer/* URL must land on the dashboard instead of rendering
+            a blank page (Routes renders null when nothing matches). Scoped to
+            /farmer/* so / and /admin/* behavior is untouched. */}
+        <Route path="/farmer/*" element={<Navigate to="/farmer" replace />} />
       </Routes>
     </BrowserRouter>
   );

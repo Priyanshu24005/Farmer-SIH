@@ -1,10 +1,10 @@
-import { useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { BadgeCheck, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import FarmerAuthHeader from "../../components/farmer/FarmerAuthHeader";
 import useFarmerPreferences from "../../components/farmer/useFarmerPreferences";
-import { registerFarmer } from "../../api/farmer/farmers";
-import { saveFarmerProfile } from "../../components/farmer/farmerSession";
+import { registerFarmer } from "../../api/farmer/auth";
+import { saveAuthSession } from "../../components/farmer/farmerSession";
 import "./farmerBase.css";
 import "./farmerLogin.css";
 import "./farmerRegister.css";
@@ -25,18 +25,29 @@ const COPY = {
     namePlaceholder: "Enter your full name",
     nameError: "Please enter your full name.",
     mobileLabel: "Mobile Number",
-    verified: "Verified",
+    mobilePlaceholder: "Enter mobile number",
+    mobileInvalidText: "Please enter a valid 10-digit mobile number.",
     aadhaarLabel: "Aadhaar Number",
     aadhaarPlaceholder: "Enter 12-digit Aadhaar number",
     aadhaarError: "Please enter a valid 12-digit Aadhaar number.",
     showAadhaar: "Show Aadhaar number",
     hideAadhaar: "Hide Aadhaar number",
+    passwordLabel: "Password",
+    passwordPlaceholder: "Create a password (min 8 characters)",
+    passwordError: "Please create a password with at least 8 characters.",
+    showPassword: "Show password",
+    hidePassword: "Hide password",
+    confirmPasswordLabel: "Confirm Password",
+    confirmPasswordPlaceholder: "Re-enter your password",
+    confirmPasswordError: "Passwords do not match.",
+    showConfirmPassword: "Show confirm password",
+    hideConfirmPassword: "Hide confirm password",
     cropLabel: "Primary Crop",
     cropPlaceholder: "Select your primary crop",
     submitCta: "Create Account",
-    submittingText: "Creating Account...",
-    duplicateError: "This mobile number is already registered. Please log in instead.",
-    genericError: "Unable to create your account. Please try again.",
+    submittingText: "Creating account...",
+    duplicateError: "This mobile number is already registered. Please log in.",
+    genericError: "Your account could not be created. Please try again.",
     crops: {
       Wheat: "Wheat",
       Rice: "Rice",
@@ -58,7 +69,8 @@ const COPY = {
     namePlaceholder: "अपना पूरा नाम दर्ज करें",
     nameError: "कृपया अपना पूरा नाम दर्ज करें।",
     mobileLabel: "मोबाइल नंबर",
-    verified: "सत्यापित",
+    mobilePlaceholder: "मोबाइल नंबर दर्ज करें",
+    mobileInvalidText: "कृपया एक वैध 10 अंकों का मोबाइल नंबर दर्ज करें।",
     aadhaarLabel: "आधार नंबर",
     aadhaarPlaceholder: "12 अंकों का आधार नंबर दर्ज करें",
     aadhaarError: "कृपया एक वैध 12 अंकों का आधार नंबर दर्ज करें।",
@@ -66,6 +78,16 @@ const COPY = {
     hideAadhaar: "आधार नंबर छिपाएं",
     cropLabel: "मुख्य फसल",
     cropPlaceholder: "अपनी मुख्य फसल चुनें",
+    passwordLabel: "पासवर्ड",
+    passwordPlaceholder: "पासवर्ड बनाएं (न्यूनतम 8 अक्षर)",
+    passwordError: "कृपया कम से कम 8 अक्षरों का पासवर्ड बनाएं।",
+    showPassword: "पासवर्ड दिखाएं",
+    hidePassword: "पासवर्ड छिपाएं",
+    confirmPasswordLabel: "पासवर्ड की पुष्टि करें",
+    confirmPasswordPlaceholder: "पासवर्ड दोबारा दर्ज करें",
+    confirmPasswordError: "पासवर्ड मेल नहीं खाते।",
+    showConfirmPassword: "पुष्टि पासवर्ड दिखाएं",
+    hideConfirmPassword: "पुष्टि पासवर्ड छिपाएं",
     submitCta: "खाता बनाएं",
     submittingText: "खाता बन रहा है...",
     duplicateError: "यह मोबाइल नंबर पहले से पंजीकृत है। कृपया लॉगिन करें।",
@@ -80,38 +102,41 @@ const COPY = {
   },
 };
 
-function maskMobile(raw) {
-  const d = (raw || "").replace(/\D/g, "").slice(-10);
-  if (d.length !== 10) return raw || "";
-  return `+91 ${d.slice(0, 2)}******${d.slice(8)}`;
-}
+const isValidMobile = (value) => /^[6-9]\d{9}$/.test(value);
 
 export default function FarmerRegister() {
   const { language, setLanguage, theme, toggleTheme } = useFarmerPreferences();
   const navigate = useNavigate();
-  const location = useLocation();
   const copy = COPY[language] || COPY.en;
 
-  const verifiedMobile = location.state?.mobile || "";
-  const mobileDigits = useMemo(
-    () => (verifiedMobile || "").replace(/\D/g, "").slice(-10),
-    [verifiedMobile]
-  );
-  const maskedMobile = useMemo(() => maskMobile(verifiedMobile), [verifiedMobile]);
-
   const [name, setName] = useState("");
+  const [mobile, setMobile] = useState("");
   const [aadhaar, setAadhaar] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [crop, setCrop] = useState("");
   const [showAadhaar, setShowAadhaar] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [touched, setTouched] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
 
   const nameValid = name.trim().length >= 2;
+  const mobileValid = isValidMobile(mobile);
   const aadhaarValid = /^\d{12}$/.test(aadhaar);
+  const passwordValid = password.length >= 8;
+  const confirmValid = confirmPassword.length > 0 && confirmPassword === password;
   const cropValid = CROP_VALUES.includes(crop);
-  const mobileValid = mobileDigits.length === 10;
-  const formValid = nameValid && aadhaarValid && cropValid && mobileValid;
+  const formValid =
+    nameValid && mobileValid && aadhaarValid && passwordValid && confirmValid && cropValid;
+
+  const showFieldError = (valid, value) => touched && (value.length > 0 ? !valid : true);
+
+  const handleMobileChange = (event) => {
+    const digitsOnly = event.target.value.replace(/\D/g, "").slice(0, 10);
+    setMobile(digitsOnly);
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -121,32 +146,29 @@ export default function FarmerRegister() {
 
     setSubmitting(true);
     try {
-      // Exact backend contract for POST /api/farmers — no password/OTP.
+      // Exact backend contract for POST /api/auth/register. Only the
+      // documented fields (name, mobile, aadhaar, password, cropType) are sent.
       const data = await registerFarmer({
         name: name.trim(),
-        mobile: mobileDigits,
+        mobile,
         aadhaar,
+        password,
         cropType: crop,
       });
 
-      // createFarmer returns the created Farmer document (no JWT). Cache only
-      // the non-sensitive identity the dashboard needs (id + name). No Aadhaar
-      // or password is ever stored client-side.
-      saveFarmerProfile({
-        _id: data?._id || data?.id,
-        name: data?.name || name.trim(),
-      });
-      // /farmer renders FarmerHome (Task 5).
+      // Persists token + role + minimal profile (id, name). Never stores
+      // password or raw Aadhaar.
+      saveAuthSession(data);
       navigate("/farmer", { replace: true });
     } catch (error) {
       const status = error?.response?.status;
       const serverMsg = error?.response?.data?.message || "";
-      console.error("[FarmerRegister] Registration error:", {
+      console.error("[FarmerRegister] Register error:", {
         status,
         message: serverMsg,
         networkError: !error?.response ? error?.message : undefined,
       });
-      if (status === 409 || /already|duplicate|exists|E11000/i.test(serverMsg)) {
+      if (status === 409) {
         setFormError(copy.duplicateError);
       } else {
         setFormError(copy.genericError);
@@ -156,8 +178,6 @@ export default function FarmerRegister() {
     }
   };
 
-  const showFieldError = (valid, value) => touched && (value.length > 0 ? !valid : true);
-
   return (
     <div className={`farmer-welcome farmer-welcome--${theme}`} lang={language === "hi" ? "hi" : "en"}>
       <FarmerAuthHeader
@@ -166,7 +186,7 @@ export default function FarmerRegister() {
         onLanguageChange={setLanguage}
         theme={theme}
         onThemeToggle={toggleTheme}
-        backTo="/farmer/otp"
+        backTo="/farmer/login"
       />
 
       <main className="farmer-shell farmer-auth" id="farmer-register-main">
@@ -191,6 +211,7 @@ export default function FarmerRegister() {
                   onBlur={() => setTouched(true)}
                   placeholder={copy.namePlaceholder}
                   aria-invalid={showFieldError(nameValid, name)}
+                  disabled={submitting}
                 />
               </div>
               {showFieldError(nameValid, name) && (
@@ -198,16 +219,31 @@ export default function FarmerRegister() {
               )}
             </div>
 
-            {/* Mobile (verified, read-only) */}
+            {/* Mobile */}
             <div className="farmer-register__group">
-              <span className="farmer-field__label" id="reg-mobile-label">{copy.mobileLabel}</span>
-              <div className="farmer-register__mobile" aria-labelledby="reg-mobile-label">
-                <span className="farmer-register__mobile-value">{maskedMobile || "+91 ••••••••••"}</span>
-                <span className="farmer-register__verified">
-                  <BadgeCheck size={16} aria-hidden="true" />
-                  {copy.verified}
-                </span>
+              <label className="farmer-field__label" htmlFor="reg-mobile">{copy.mobileLabel}</label>
+              <div className={`farmer-field ${showFieldError(mobileValid, mobile) ? "farmer-field--error" : ""}`}>
+                <span className="farmer-field__prefix" aria-hidden="true">+91</span>
+                <input
+                  id="reg-mobile"
+                  className="farmer-field__input"
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel-national"
+                  pattern="[6-9][0-9]{9}"
+                  maxLength={10}
+                  value={mobile}
+                  onChange={handleMobileChange}
+                  onBlur={() => setTouched(true)}
+                  placeholder={copy.mobilePlaceholder}
+                  aria-label={copy.mobileLabel}
+                  aria-invalid={showFieldError(mobileValid, mobile)}
+                  disabled={submitting}
+                />
               </div>
+              {showFieldError(mobileValid, mobile) && (
+                <p className="farmer-field__error" role="alert">{copy.mobileInvalidText}</p>
+              )}
             </div>
 
             {/* Aadhaar */}
@@ -226,6 +262,7 @@ export default function FarmerRegister() {
                   onBlur={() => setTouched(true)}
                   placeholder={copy.aadhaarPlaceholder}
                   aria-invalid={showFieldError(aadhaarValid, aadhaar)}
+                  disabled={submitting}
                 />
                 <button
                   type="button"
@@ -241,6 +278,66 @@ export default function FarmerRegister() {
               )}
             </div>
 
+            {/* Password */}
+            <div className="farmer-register__group">
+              <label className="farmer-field__label" htmlFor="reg-password">{copy.passwordLabel}</label>
+              <div className={`farmer-field ${touched && !passwordValid ? "farmer-field--error" : ""}`}>
+                <input
+                  id="reg-password"
+                  className="farmer-field__input farmer-field__input--padded"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onBlur={() => setTouched(true)}
+                  placeholder={copy.passwordPlaceholder}
+                  aria-invalid={touched && !passwordValid}
+                  disabled={submitting}
+                />
+                <button
+                  type="button"
+                  className="farmer-field__toggle"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? copy.hidePassword : copy.showPassword}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {touched && !passwordValid && (
+                <p className="farmer-field__error" role="alert">{copy.passwordError}</p>
+              )}
+            </div>
+
+            {/* Confirm Password */}
+            <div className="farmer-register__group">
+              <label className="farmer-field__label" htmlFor="reg-confirm-password">{copy.confirmPasswordLabel}</label>
+              <div className={`farmer-field ${touched && !confirmValid ? "farmer-field--error" : ""}`}>
+                <input
+                  id="reg-confirm-password"
+                  className="farmer-field__input farmer-field__input--padded"
+                  type={showConfirmPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onBlur={() => setTouched(true)}
+                  placeholder={copy.confirmPasswordPlaceholder}
+                  aria-invalid={touched && !confirmValid}
+                  disabled={submitting}
+                />
+                <button
+                  type="button"
+                  className="farmer-field__toggle"
+                  onClick={() => setShowConfirmPassword((v) => !v)}
+                  aria-label={showConfirmPassword ? copy.hideConfirmPassword : copy.showConfirmPassword}
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {touched && !confirmValid && (
+                <p className="farmer-field__error" role="alert">{copy.confirmPasswordError}</p>
+              )}
+            </div>
+
             {/* Primary Crop */}
             <div className="farmer-register__group">
               <label className="farmer-field__label" htmlFor="reg-crop">{copy.cropLabel}</label>
@@ -252,6 +349,7 @@ export default function FarmerRegister() {
                   onChange={(e) => setCrop(e.target.value)}
                   onBlur={() => setTouched(true)}
                   aria-invalid={touched && !cropValid}
+                  disabled={submitting}
                 >
                   <option value="" disabled>{copy.cropPlaceholder}</option>
                   {CROP_VALUES.map((value) => (

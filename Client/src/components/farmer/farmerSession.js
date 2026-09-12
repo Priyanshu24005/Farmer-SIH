@@ -14,8 +14,28 @@ export function saveFarmerProfile(profile) {
   try {
     localStorage.setItem(
       PROFILE_KEY,
-      JSON.stringify({ id: profile._id || "", name: profile.name || "" })
+      JSON.stringify({ id: profile._id || profile.id || "", name: profile.name || "" })
     );
+  } catch {
+    // Non-fatal.
+  }
+}
+
+// Call this once, right after a successful POST /auth/login or
+// POST /auth/register response. Persists everything the rest of the app
+// needs: the JWT (read by src/api/axios.js on every request), the role, and
+// a small non-sensitive profile (id + name). Never pass in password/Aadhaar.
+//
+// NOTE: the backend does not yet return `role` on these responses (see
+// api/farmer/auth.js). Public registration/login always resolves to a
+// farmer, so we default to "farmer" here until the backend is updated to
+// send it explicitly.
+export function saveAuthSession(data) {
+  if (!data) return;
+  try {
+    localStorage.setItem("token", data.token || "");
+    localStorage.setItem("role", data.role || "farmer");
+    saveFarmerProfile({ _id: data._id || data.id, name: data.name });
   } catch {
     // Non-fatal.
   }
@@ -30,10 +50,19 @@ export function getFarmerProfile() {
   }
 }
 
+export function getFarmerRole() {
+  try {
+    return localStorage.getItem("role");
+  } catch {
+    return null;
+  }
+}
+
 export function clearFarmerSession() {
   try {
     localStorage.removeItem(PROFILE_KEY);
     localStorage.removeItem("token");
+    localStorage.removeItem("role");
   } catch {
     // Non-fatal.
   }

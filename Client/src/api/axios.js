@@ -31,7 +31,7 @@ api.interceptors.response.use(
     if (status === 401) {
       toast.error("Session expired. Please log in again.");
       localStorage.removeItem("token");
-      window.location.href = "/login";
+      window.location.href = "/farmer/login";
     } else if (status === 404) {
       toast.error("Not found: " + message);
     } else if (status >= 500) {

@@ -55,50 +55,6 @@
   font-weight: 500;
 }
 
-.farmer-register__mobile {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  min-height: 56px;
-  padding: 0 14px;
-  border: 1.5px solid var(--farm-line);
-  border-radius: 14px;
-  background: var(--farm-soft);
-}
-
-.farmer-register__mobile-value {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--farm-text);
-  font-size: 1.02rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.farmer-register__verified {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  flex: 0 0 auto;
-  padding: 5px 10px;
-  border-radius: 999px;
-  color: #1c7a41;
-  background: color-mix(in srgb, var(--farm-primary) 18%, transparent);
-  font-size: 0.76rem;
-  font-weight: 800;
-}
-
-.farmer-welcome--dark .farmer-register__verified {
-  color: #a6e07a;
-}
-
-.farmer-register__verified svg {
-  flex: 0 0 auto;
-}
-
 .farmer-register__form-error {
   margin-top: 16px;
   padding: 11px 13px;
