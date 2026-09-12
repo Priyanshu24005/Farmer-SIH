@@ -1,0 +1,446 @@
+/* Farmer Home / Dashboard — reuses shared --farm-* tokens from farmerWelcome.css. */
+
+.farmer-home {
+  padding-bottom: 78px; /* room for fixed bottom nav */
+}
+
+.farmer-home__icon-btn,
+.farmer-home__avatar {
+  position: relative;
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid var(--farm-line);
+  border-radius: 50%;
+  color: var(--farm-primary);
+  background: var(--farm-soft);
+  cursor: pointer;
+}
+
+.farmer-home__avatar {
+  color: #fff;
+  background: linear-gradient(145deg, #317d45, #185a33);
+  border-color: transparent;
+}
+
+.farmer-welcome--dark .farmer-home__avatar {
+  color: #102519;
+  background: linear-gradient(145deg, #8ccf59, #73b748);
+}
+
+.farmer-home__dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--farm-surface);
+  border-radius: 50%;
+  background: var(--farm-accent);
+}
+
+.farmer-home__main {
+  padding-top: 20px;
+  padding-bottom: 30px;
+  display: grid;
+  gap: 18px;
+}
+
+.farmer-home__greeting h1 {
+  margin: 0;
+  color: var(--farm-text);
+  font-size: clamp(1.5rem, 5.5vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.farmer-home__greeting p {
+  margin: 5px 0 0;
+  color: var(--farm-muted);
+  font-size: 0.95rem;
+}
+
+.farmer-home__cta {
+  width: 100%;
+  margin-top: 0;
+}
+
+/* Active token card */
+.farmer-home__token {
+  padding: 20px;
+  border: 1px solid var(--farm-line);
+  border-radius: 20px;
+  background: linear-gradient(150deg, var(--farm-soft), var(--farm-surface));
+  box-shadow: var(--farm-shadow);
+}
+
+.farmer-home__token-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.farmer-home__token-head h2 {
+  margin: 0;
+  color: var(--farm-text);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.farmer-home__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  color: #8a5a00;
+  background: #fdeecb;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.farmer-welcome--dark .farmer-home__status {
+  color: #ffd98a;
+  background: #4c3f1a;
+}
+
+.farmer-home__status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.farmer-home__token-number {
+  margin: 12px 0 4px;
+  color: var(--farm-primary);
+  font-size: clamp(2.2rem, 9vw, 2.8rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.farmer-home__token-meta {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.farmer-home__token-meta li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--farm-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.farmer-home__token-meta svg {
+  flex: 0 0 auto;
+  color: var(--farm-primary);
+}
+
+.farmer-home__token-wait {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 15px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--farm-line);
+}
+
+.farmer-home__ahead {
+  color: var(--farm-text);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.farmer-home__wait-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--farm-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.farmer-home__secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 46px;
+  margin-top: 16px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--farm-primary);
+  border-radius: 13px;
+  color: var(--farm-primary);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.farmer-home__secondary:hover {
+  background: color-mix(in srgb, var(--farm-primary) 12%, transparent);
+}
+
+/* Empty state */
+.farmer-home__empty {
+  padding: 30px 22px;
+  border: 1px dashed var(--farm-line);
+  border-radius: 20px;
+  background: var(--farm-surface);
+  text-align: center;
+}
+
+.farmer-home__empty-icon {
+  display: inline-grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border-radius: 16px;
+  color: var(--farm-primary);
+  background: var(--farm-soft);
+}
+
+.farmer-home__empty h2 {
+  margin: 14px 0 0;
+  color: var(--farm-text);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.farmer-home__empty p {
+  margin: 7px 0 18px;
+  color: var(--farm-muted);
+  font-size: 0.9rem;
+}
+
+/* Quick stats */
+.farmer-home__stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.farmer-home__stat {
+  display: grid;
+  gap: 4px;
+  padding: 16px;
+  border: 1px solid var(--farm-line);
+  border-radius: 16px;
+  background: var(--farm-surface);
+}
+
+.farmer-home__stat-icon {
+  display: inline-grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  margin-bottom: 4px;
+  border-radius: 11px;
+  color: var(--farm-primary);
+  background: var(--farm-soft);
+}
+
+.farmer-home__stat-icon--amber {
+  color: #a8760a;
+  background: #fbedcb;
+}
+
+.farmer-welcome--dark .farmer-home__stat-icon--amber {
+  color: #f0c84e;
+  background: #4c3f1a;
+}
+
+.farmer-home__stat-value {
+  color: var(--farm-text);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.farmer-home__stat-label {
+  color: var(--farm-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* Recent activity */
+.farmer-home__activity-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.farmer-home__activity-head h2 {
+  margin: 0;
+  color: var(--farm-text);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.farmer-home__viewall {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--farm-primary);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.farmer-home__activity-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.farmer-home__activity-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  border: 1px solid var(--farm-line);
+  border-radius: 14px;
+  background: var(--farm-surface);
+}
+
+.farmer-home__activity-icon {
+  display: inline-grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 11px;
+}
+
+.farmer-home__activity-icon--payment {
+  color: #1c7a41;
+  background: color-mix(in srgb, var(--farm-primary) 16%, transparent);
+}
+
+.farmer-welcome--dark .farmer-home__activity-icon--payment {
+  color: #a6e07a;
+}
+
+.farmer-home__activity-icon--procurement {
+  color: #a8760a;
+  background: #fbedcb;
+}
+
+.farmer-welcome--dark .farmer-home__activity-icon--procurement {
+  color: #f0c84e;
+  background: #4c3f1a;
+}
+
+.farmer-home__activity-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.farmer-home__activity-body strong {
+  display: block;
+  color: var(--farm-text);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.farmer-home__activity-body small {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--farm-muted);
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.farmer-home__activity-when {
+  flex: 0 0 auto;
+  color: var(--farm-muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+/* Bottom navigation */
+.farmer-bottomnav {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 20;
+  border-top: 1px solid var(--farm-line);
+  background: color-mix(in srgb, var(--farm-surface) 96%, transparent);
+  backdrop-filter: blur(8px);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.farmer-bottomnav ul {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  width: min(100%, 560px);
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.farmer-bottomnav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-height: 58px;
+  padding: 8px 2px;
+  color: var(--farm-muted);
+  text-decoration: none;
+  font-size: 0.64rem;
+  font-weight: 700;
+}
+
+.farmer-bottomnav__item svg {
+  flex: 0 0 auto;
+}
+
+.farmer-bottomnav__item.is-active {
+  color: var(--farm-primary);
+}
+
+/* Desktop / tablet: keep it simple and centered, not an admin console. */
+@media (min-width: 760px) {
+  .farmer-home__main {
+    max-width: 620px;
+    padding-top: 32px;
+  }
+
+  .farmer-home__cta {
+    width: auto;
+    min-width: 240px;
+    justify-self: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .farmer-home__secondary,
+  .farmer-primary-cta {
+    transition: none;
+  }
+}

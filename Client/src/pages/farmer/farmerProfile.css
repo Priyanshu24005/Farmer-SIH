@@ -1,0 +1,32 @@
+.farmer-profile { min-height: 100vh; padding-bottom: 96px; }
+.farmer-profile__main { width: min(100%, 760px); padding-top: 24px; padding-bottom: 36px; }
+.farmer-profile__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.farmer-profile__eyebrow { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; color: var(--farm-primary); font-size: .74rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.farmer-profile__heading h1 { margin: 0; color: var(--farm-text); font-size: clamp(1.55rem, 6vw, 2.1rem); line-height: 1.15; }
+.farmer-profile__heading p:last-child { margin: 7px 0 0; color: var(--farm-muted); font-size: .86rem; }
+.farmer-profile__heading-icon, .farmer-profile__avatar { display: inline-grid; place-items: center; color: var(--farm-primary); background: var(--farm-soft); }
+.farmer-profile__heading-icon { width: 50px; height: 50px; flex: 0 0 auto; border-radius: 16px; }
+.farmer-profile__identity { display: flex; align-items: center; gap: 13px; padding: 17px; border: 1px solid var(--farm-line); border-radius: 18px; background: linear-gradient(145deg, var(--farm-soft), var(--farm-surface)); box-shadow: var(--farm-shadow); }
+.farmer-profile__avatar { width: 54px; height: 54px; border-radius: 17px; color: #fff; background: linear-gradient(145deg, #317d45, #185a33); font-size: 1.35rem; font-weight: 900; }
+.farmer-profile__identity h2 { margin: 0; color: var(--farm-text); font-size: 1.1rem; }
+.farmer-profile__verified, .farmer-profile__field em { display: inline-flex; align-items: center; gap: 4px; color: #17633a; font-size: .7rem; font-style: normal; font-weight: 800; }
+.farmer-profile__verified { margin-top: 5px; }
+.farmer-profile__card { margin-top: 14px; padding: 17px; border: 1px solid var(--farm-line); border-radius: 18px; background: var(--farm-surface); box-shadow: var(--farm-shadow); }
+.farmer-profile__card h2 { display: flex; align-items: center; gap: 7px; margin: 0 0 12px; color: var(--farm-muted); font-size: .74rem; font-weight: 700; line-height: 1.4; }
+.farmer-profile__fields { display: grid; gap: 0; }
+.farmer-profile__field { display: grid; grid-template-columns: auto 1fr auto; gap: 9px; align-items: center; padding: 13px 0; border-top: 1px solid color-mix(in srgb, var(--farm-line) 70%, transparent); }
+.farmer-profile__field-icon { display: inline-grid; color: var(--farm-primary); }
+.farmer-profile__field span:nth-child(2) { display: grid; gap: 3px; min-width: 0; }
+.farmer-profile__field small { color: var(--farm-muted); font-size: .7rem; font-weight: 700; }
+.farmer-profile__field strong { color: var(--farm-text); font-size: .86rem; overflow-wrap: anywhere; }
+.farmer-profile__field em { color: var(--farm-primary); white-space: nowrap; }
+.farmer-profile__edit, .farmer-profile__settings-link { display: flex; align-items: center; cursor: pointer; }
+.farmer-profile__edit { justify-content: center; gap: 7px; width: 100%; min-height: 48px; margin-top: 14px; border: 1px solid var(--farm-primary); border-radius: 13px; color: var(--farm-primary); background: transparent; font-weight: 800; }
+.farmer-profile__notice { margin: 9px 0 0; color: var(--farm-primary); font-size: .75rem; font-weight: 700; text-align: center; }
+.farmer-profile__settings-link { width: 100%; gap: 10px; margin-top: 14px; padding: 13px; border: 1px solid var(--farm-line); border-radius: 16px; color: var(--farm-text); background: var(--farm-surface); text-align: left; }
+.farmer-profile__settings-link > span:nth-child(2) { display: grid; flex: 1; gap: 3px; }
+.farmer-profile__settings-link strong { font-size: .84rem; }
+.farmer-profile__settings-link small { color: var(--farm-muted); font-size: .72rem; line-height: 1.35; }
+.farmer-profile__settings-link > svg { color: var(--farm-primary); }
+.farmer-profile__settings-icon { display: inline-grid; width: 34px; height: 34px; place-items: center; border-radius: 10px; color: var(--farm-primary); background: var(--farm-soft); }
+@media (min-width: 640px) { .farmer-profile__main { padding-top: 34px; } }

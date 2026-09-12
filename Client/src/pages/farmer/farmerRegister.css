@@ -1,0 +1,113 @@
+/* Farmer Registration — reuses shared --farm-* tokens, .farmer-auth and .farmer-field. */
+
+.farmer-register__card {
+  width: min(100%, 480px);
+}
+
+.farmer-register__form {
+  margin-top: 22px;
+}
+
+.farmer-register__group {
+  margin-bottom: 16px;
+}
+
+.farmer-register__group:last-of-type {
+  margin-bottom: 0;
+}
+
+/* When a field carries no external label spacing, keep input text comfortable. */
+.farmer-field__input--padded {
+  padding: 0 14px;
+}
+
+.farmer-field__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  flex: 0 0 auto;
+  width: 48px;
+  padding: 0;
+  border: 0;
+  border-left: 1.5px solid var(--farm-line);
+  color: var(--farm-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.farmer-field__toggle:hover {
+  color: var(--farm-primary);
+}
+
+.farmer-register__select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235d7161' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
+}
+
+.farmer-register__select.is-placeholder {
+  color: var(--farm-muted);
+  font-weight: 500;
+}
+
+.farmer-register__mobile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 56px;
+  padding: 0 14px;
+  border: 1.5px solid var(--farm-line);
+  border-radius: 14px;
+  background: var(--farm-soft);
+}
+
+.farmer-register__mobile-value {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--farm-text);
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.farmer-register__verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  padding: 5px 10px;
+  border-radius: 999px;
+  color: #1c7a41;
+  background: color-mix(in srgb, var(--farm-primary) 18%, transparent);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.farmer-welcome--dark .farmer-register__verified {
+  color: #a6e07a;
+}
+
+.farmer-register__verified svg {
+  flex: 0 0 auto;
+}
+
+.farmer-register__form-error {
+  margin-top: 16px;
+  padding: 11px 13px;
+  border: 1px solid #e0a0a0;
+  border-radius: 12px;
+  background: rgba(214, 69, 69, 0.08);
+}
+
+.farmer-welcome--dark .farmer-register__form-error {
+  border-color: #7d4141;
+  background: rgba(255, 155, 155, 0.1);
+}

@@ -1,0 +1,260 @@
+/* Farmer Login — reuses the shared --farm-* tokens defined in farmerWelcome.css. */
+
+.farmer-header__lead {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.farmer-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 6px 10px 6px 6px;
+  border: 1px solid var(--farm-line);
+  border-radius: 10px;
+  color: var(--farm-text);
+  background: var(--farm-soft);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.farmer-back:hover {
+  background: var(--farm-soft-strong);
+}
+
+.farmer-back__text {
+  line-height: 1;
+}
+
+.farmer-auth {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 30px;
+  padding-bottom: 48px;
+}
+
+.farmer-auth__card {
+  width: min(100%, 440px);
+  padding: 26px 22px 24px;
+  border: 1px solid var(--farm-line);
+  border-radius: 22px;
+  background: var(--farm-surface);
+  box-shadow: var(--farm-shadow);
+}
+
+.farmer-auth__intro {
+  text-align: center;
+}
+
+.farmer-auth__intro h1 {
+  margin: 0;
+  color: var(--farm-text);
+  font-size: clamp(1.7rem, 6vw, 2.15rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+
+.farmer-auth__intro p {
+  margin: 9px 0 0;
+  color: var(--farm-muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.farmer-auth__form {
+  margin-top: 24px;
+}
+
+.farmer-field__label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--farm-text);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.farmer-field {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  overflow: hidden;
+  border: 1.5px solid var(--farm-line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--farm-surface) 88%, var(--farm-soft));
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.farmer-field:focus-within {
+  border-color: var(--farm-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--farm-primary) 22%, transparent);
+}
+
+.farmer-field--error {
+  border-color: #d64545;
+}
+
+.farmer-field--error:focus-within {
+  border-color: #d64545;
+  box-shadow: 0 0 0 3px rgba(214, 69, 69, 0.2);
+}
+
+.farmer-field__prefix {
+  display: inline-flex;
+  align-items: center;
+  align-self: stretch;
+  padding: 0 13px;
+  border-right: 1.5px solid var(--farm-line);
+  color: var(--farm-text);
+  background: var(--farm-soft);
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+
+.farmer-field__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  padding: 0 14px;
+  border: 0;
+  color: var(--farm-text);
+  background: transparent;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.farmer-field__input::placeholder {
+  color: var(--farm-muted);
+  font-weight: 500;
+  letter-spacing: normal;
+}
+
+.farmer-field__input:focus {
+  outline: none;
+}
+
+.farmer-field__input:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.farmer-field__help,
+.farmer-field__error {
+  margin: 9px 2px 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.farmer-field__help {
+  color: var(--farm-muted);
+}
+
+.farmer-field__error {
+  color: #d64545;
+  font-weight: 600;
+}
+
+.farmer-welcome--dark .farmer-field__error,
+.farmer-welcome--dark .farmer-field--error {
+  color: #ff9b9b;
+}
+
+.farmer-welcome--dark .farmer-field--error {
+  border-color: #ff9b9b;
+}
+
+.farmer-auth__cta {
+  margin-top: 22px;
+  width: 100%;
+}
+
+.farmer-auth__cta:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow: none;
+  transform: none;
+}
+
+.farmer-auth__register {
+  margin: 22px 0 0;
+  text-align: center;
+  color: var(--farm-muted);
+  font-size: 0.9rem;
+}
+
+.farmer-auth__register-link {
+  padding: 2px 2px;
+  border: 0;
+  border-radius: 4px;
+  color: var(--farm-primary);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.farmer-auth__secure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin: 20px 0 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--farm-line);
+  color: var(--farm-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.farmer-auth__secure svg {
+  flex: 0 0 auto;
+  color: var(--farm-primary);
+}
+
+.farmer-spin {
+  animation: farmer-spin 900ms linear infinite;
+}
+
+@keyframes farmer-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (min-width: 760px) {
+  .farmer-auth {
+    padding-top: 56px;
+    padding-bottom: 72px;
+  }
+
+  .farmer-auth__card {
+    padding: 34px 32px 30px;
+  }
+}
+
+@media (max-width: 374px) {
+  .farmer-back__text {
+    display: none;
+  }
+
+  .farmer-back {
+    padding: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .farmer-field,
+  .farmer-spin {
+    transition: none;
+    animation: none;
+  }
+}

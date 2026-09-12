@@ -1,0 +1,80 @@
+/* Farmer OTP — reuses shared --farm-* tokens and .farmer-auth layout. */
+
+.farmer-otp__number {
+  display: inline-block;
+  margin-top: 4px;
+  color: var(--farm-text);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.farmer-otp__change {
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.farmer-otp__boxes {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.farmer-otp__box {
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 3 / 4;
+  max-height: 60px;
+  padding: 0;
+  border: 1.5px solid var(--farm-line);
+  border-radius: 12px;
+  color: var(--farm-text);
+  background: color-mix(in srgb, var(--farm-surface) 88%, var(--farm-soft));
+  text-align: center;
+  font-size: 1.35rem;
+  font-weight: 800;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.farmer-otp__box:focus {
+  outline: none;
+  border-color: var(--farm-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--farm-primary) 22%, transparent);
+}
+
+.farmer-otp__box:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.farmer-otp__boxes--error .farmer-otp__box {
+  border-color: #d64545;
+}
+
+.farmer-welcome--dark .farmer-otp__boxes--error .farmer-otp__box {
+  border-color: #ff9b9b;
+}
+
+.farmer-otp__resend {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--farm-line);
+  text-align: center;
+}
+
+.farmer-otp__resend .farmer-field__help {
+  display: inline;
+  margin: 0;
+}
+
+@media (max-width: 359px) {
+  .farmer-otp__boxes {
+    gap: 6px;
+  }
+
+  .farmer-otp__box {
+    font-size: 1.15rem;
+    border-radius: 10px;
+  }
+}
