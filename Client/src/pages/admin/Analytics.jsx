@@ -118,7 +118,7 @@ export default function Analytics() {
           >
             {mandis.length === 0 && <option>No mandis yet</option>}
             {mandis.map((m) => (
-              <option key={m._id} value={m._id}>
+              <option key={m._id} value={m._id} className="bg-surface text-ink">
                 {m.name}
               </option>
             ))}

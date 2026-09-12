@@ -47,7 +47,7 @@ export default function Farmers() {
         View registered farmers and their crop and mandi details.
       </p>
 
-      <div className="bg-white rounded-2xl border border-black/5 overflow-hidden">
+      <div className="bg-surface rounded-2xl border border-border overflow-hidden">
         <div className="p-4 border-b border-black/5 relative">
           <Search
             size={16}
@@ -58,7 +58,7 @@ export default function Farmers() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search name, mobile, crop..."
-            className="w-full max-w-sm pl-9 pr-4 py-2.5 rounded-xl bg-[#F5F3EC] text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E4635]/20"
+            className="w-full max-w-sm pl-9 pr-4 py-2.5 rounded-xl bg-surface-soft text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
 
@@ -70,65 +70,59 @@ export default function Farmers() {
           </div>
         ) : filteredFarmers.length === 0 ? (
           <div className="p-12 flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-full bg-[#F0E6D2] flex items-center justify-center mb-3">
-              <Search size={20} className="text-[#1E4635]" />
-            </div>
-            <p className="font-semibold text-gray-900">
-              {search ? "No matching farmers" : "No farmers registered yet"}
-            </p>
-            <p className="text-gray-500 text-sm mt-1">
-              {search
-                ? "Try a different name, mobile number, or crop."
-                : "Farmers will show up here once they register."}
-            </p>
+           <div className="w-12 h-12 rounded-full bg-accent-soft flex items-center justify-center mb-3">
+  <Search size={20} className="text-on-primary" />
+</div>
+<p className="font-semibold text-accent">No farmers registered yet</p>
+<p className="text-muted text-sm mt-1">Farmers will show up here once they register.</p>
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-gray-500 bg-[#F5F3EC]/60">
-                <th className="font-medium px-6 py-3">Farmer</th>
-                <th className="font-medium px-6 py-3">Mobile</th>
-                <th className="font-medium px-6 py-3">Crop</th>
-                <th className="font-medium px-6 py-3">Mandi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredFarmers.map((farmer) => (
-                <tr
-                  key={farmer._id}
-                  onClick={() => setSelected(farmer)}
-                  className="border-t border-black/5 cursor-pointer hover:bg-[#F5F3EC]/40"
-                >
-                  <td className="px-6 py-4 font-medium text-gray-900">
-                    {farmer.name}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">{farmer.mobile}</td>
-                  <td className="px-6 py-4 text-gray-600">
-                    {farmer.cropType || "—"}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">
-                    {mandiLabel(farmer.mandi)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+  <thead>
+    <tr className="text-left text-muted bg-surface-soft">
+      <th className="font-medium px-6 py-3">Farmer</th>
+      <th className="font-medium px-6 py-3">Mobile</th>
+      <th className="font-medium px-6 py-3">Crop</th>
+      <th className="font-medium px-6 py-3">Mandi</th>
+    </tr>
+  </thead>
+  <tbody>
+    {filteredFarmers.map((farmer) => (
+      <tr
+        key={farmer._id}
+        onClick={() => setSelected(farmer)}
+        className="border-t border-border cursor-pointer hover:bg-surface-soft"
+      >
+        <td className="px-6 py-4 font-medium text-ink">
+          {farmer.name}
+        </td>
+        <td className="px-6 py-4 text-muted">{farmer.mobile}</td>
+        <td className="px-6 py-4 text-muted">
+          {farmer.cropType || "—"}
+        </td>
+        <td className="px-6 py-4 text-muted">
+          {mandiLabel(farmer.mandi)}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+        
         )}
       </div>
 
       {selected && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm p-6">
+          <div className="bg-surface rounded-2xl w-full max-w-sm p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-semibold text-gray-900">
-                Farmer details
-              </h2>
-              <button
-                onClick={() => setSelected(null)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X size={18} />
-              </button>
+              <h2 className="text-lg font-semibold text-ink">
+  Farmer details
+</h2>
+...
+<button
+  onClick={() => setSelected(null)}
+  className="text-muted hover:text-ink"
+></button>
             </div>
 
             <div className="flex items-center gap-3 mb-5">
@@ -175,7 +169,7 @@ export default function Farmers() {
 
             <button
               onClick={() => setSelected(null)}
-              className="w-full mt-6 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50"
+              className="w-full mt-6 py-2.5 rounded-xl border border-border text-sm font-medium text-muted hover:bg-surface-soft"
             >
               Close
             </button>
