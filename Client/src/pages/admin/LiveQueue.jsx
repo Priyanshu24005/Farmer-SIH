@@ -79,12 +79,12 @@ export default function LiveQueue() {
             disabled={loadingMandis || mandis.length === 0}
             className="px-4 py-2.5 rounded-xl bg-surface-soft text-sm text-ink focus:outline-none focus:ring-2 focus:ring-primary/20 min-w-[200px]"
           >
-            {loadingMandis && <option>Loading mandis...</option>}
+            {loadingMandis && <option className="bg-surface text-ink">Loading mandis...</option>}
             {!loadingMandis && mandis.length === 0 && (
               <option>No mandis yet</option>
             )}
             {mandis.map((m) => (
-              <option key={m._id} value={m._id}>
+              <option key={m._id} value={m._id} className="bg-surface text-ink">
                 {m.name}
               </option>
             ))}

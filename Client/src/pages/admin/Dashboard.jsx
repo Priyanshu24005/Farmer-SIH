@@ -50,6 +50,7 @@ export default function Dashboard() {
 
   return (
     <AdminLayout eyebrow={today} title={`Good morning, ${admin.name || "Admin"}`}>
+      
       <p className="text-muted -mt-4 mb-6">
         Here's the latest pulse across Farmer-SIH.
       </p>
