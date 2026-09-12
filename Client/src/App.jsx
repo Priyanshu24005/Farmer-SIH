@@ -8,6 +8,7 @@ import Payments from "./pages/admin/Payments";
 import Dashboard from "./pages/admin/Dashboard";
 import MandiManagement from "./pages/admin/MandiManagement";
 import Farmers from "./pages/admin/Farmers";
+import Analytics from "./pages/admin/Analytics";
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
         <Route path="/admin/farmers" element={<Farmers />} />
         <Route path="/admin/procurement" element={<ProcurementEntry />} />
 <Route path="/admin/payments" element={<Payments />} />
+<Route path="/admin/analytics" element={<Analytics />} />
       </Routes>
     </BrowserRouter>
   );

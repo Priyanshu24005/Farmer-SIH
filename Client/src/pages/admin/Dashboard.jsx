@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { Users, Sprout, Clock, ListOrdered } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
-import { getFarmers } from "../../api/admin/farmer";
-import { getMandis } from "../../api/admin/mandi";
+import { getDashboardStats } from "../../api/admin/analytics";
 
 const chartData = [40, 55, 48, 70, 65, 90];
 const chartLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Today"];
 
-function StatCard({ label, value, hint, icon: Icon }) {
+function StatCard({ label, value, icon: Icon }) {
   return (
     <div className="bg-surface rounded-2xl border border-border border-t-2 border-t-accent p-5">
       <div className="flex items-center gap-2 mb-3">
@@ -15,27 +14,19 @@ function StatCard({ label, value, hint, icon: Icon }) {
         <p className="text-muted text-sm">{label}</p>
       </div>
       <p className="font-display text-3xl font-semibold text-ink">{value}</p>
-      {hint && <p className="text-accent text-sm mt-1">{hint}</p>}
     </div>
   );
 }
 
 export default function Dashboard() {
-  const [farmerCount, setFarmerCount] = useState(null);
-  const [mandiCount, setMandiCount] = useState(null);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [farmers, mandis] = await Promise.all([
-          getFarmers(),
-          getMandis(),
-        ]);
-        const farmerList = Array.isArray(farmers) ? farmers : farmers.farmers || [];
-        const mandiList = Array.isArray(mandis) ? mandis : mandis.mandis || [];
-        setFarmerCount(farmerList.length);
-        setMandiCount(mandiList.length);
+        const data = await getDashboardStats();
+        setStats(data);
       } catch {
       } finally {
         setLoading(false);
@@ -64,18 +55,24 @@ export default function Dashboard() {
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard label="Total farmers" value={loading ? "…" : farmerCount} icon={Users} />
-        <StatCard label="Mandis registered" value={loading ? "…" : mandiCount} icon={Sprout} />
         <StatCard
-          label="Pending requests"
-          value="—"
-          hint="Wire up once token status filtering is ready"
+          label="Total farmers"
+          value={loading ? "…" : stats.totalFarmers}
+          icon={Users}
+        />
+        <StatCard
+          label="Mandis registered"
+          value={loading ? "…" : stats.totalMandis}
+          icon={Sprout}
+        />
+        <StatCard
+          label="Pending payments"
+          value={loading ? "…" : stats.pendingPayments}
           icon={Clock}
         />
         <StatCard
-          label="Live queue (all mandis)"
-          value="—"
-          hint="Wire up once queue-count endpoint is ready"
+          label="Waiting now (all mandis)"
+          value={loading ? "…" : stats.waitingNow}
           icon={ListOrdered}
         />
       </div>
@@ -86,7 +83,8 @@ export default function Dashboard() {
             Platform activity
           </p>
           <p className="text-muted text-sm mb-6">
-            Placeholder data — connect to a real analytics endpoint later.
+            Placeholder trend — swap for real historical data once an
+            over-time endpoint exists.
           </p>
           <div className="flex flex-col">
             <div className="h-40 flex gap-4">
@@ -111,33 +109,50 @@ export default function Dashboard() {
 
         <div className="bg-surface rounded-2xl border border-border p-6">
           <p className="font-display font-semibold text-ink text-lg mb-1">
-            Review queue
+            Today at a glance
           </p>
-          <p className="text-muted text-sm mb-4">Items requiring attention</p>
+          <p className="text-muted text-sm mb-4">Across all mandis</p>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-ink text-sm">Live queue</p>
-                <p className="text-muted text-xs">Waiting farmers today</p>
-              </div>
-              <span className="px-2.5 py-1 rounded-full bg-accent-soft/20 text-xs font-medium text-ink">
-                —
-              </span>
+          {loading ? (
+            <div className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-12 rounded-xl bg-surface-soft animate-pulse" />
+              ))}
             </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-ink text-sm">Support requests</p>
-                <p className="text-muted text-xs">Awaiting response</p>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-ink text-sm">Tokens today</p>
+                  <p className="text-muted text-xs">Booked across all mandis</p>
+                </div>
+                <span className="px-2.5 py-1 rounded-full bg-accent-soft/20 text-xs font-medium text-ink">
+                  {stats.tokensToday}
+                </span>
               </div>
-              <span className="px-2.5 py-1 rounded-full bg-surface-soft text-xs font-medium text-ink">
-                —
-              </span>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-ink text-sm">Served today</p>
+                  <p className="text-muted text-xs">Procurement logged</p>
+                </div>
+                <span className="px-2.5 py-1 rounded-full bg-primary/15 text-xs font-medium text-primary">
+                  {stats.servedToday}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-ink text-sm">Payments paid</p>
+                  <p className="text-muted text-xs">Out of {stats.pendingPayments + stats.paidPayments} total</p>
+                </div>
+                <span className="px-2.5 py-1 rounded-full bg-surface-soft text-xs font-medium text-ink">
+                  {stats.paidPayments}
+                </span>
+              </div>
+              <p className="text-xs text-muted pt-2 border-t border-border">
+                See the Analytics screen for the full breakdown and revenue.
+              </p>
             </div>
-            <p className="text-xs text-muted pt-2 border-t border-border">
-              These will populate once the queue/support APIs are wired in.
-            </p>
-          </div>
+          )}
         </div>
       </div>
     </AdminLayout>
