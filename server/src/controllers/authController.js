@@ -1,9 +1,9 @@
-import Farmer from '../models/Farmer.js';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import Farmer from "../models/Farmer.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 const generateToken = (id, role) => {
-  return jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
 // Register (works for both farmer and admin)
@@ -12,17 +12,21 @@ export const registerFarmer = async (req, res) => {
     const { name, mobile, aadhaar, password, cropType, role } = req.body;
 
     if (!name || !mobile || !password) {
-      return res.status(400).json({ message: 'Name, mobile, and password are required' });
+      return res
+        .status(400)
+        .json({ message: "Name, mobile, and password are required" });
     }
 
     const existingFarmer = await Farmer.findOne({ mobile });
     if (existingFarmer) {
-      return res.status(400).json({ message: 'Already registered with this mobile' });
+      return res
+        .status(400)
+        .json({ message: "Already registered with this mobile" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const finalRole = role === 'admin' ? 'admin' : 'farmer';
+    const finalRole = role === "admin" ? "admin" : "farmer";
 
     const farmer = await Farmer.create({
       name,
@@ -30,7 +34,7 @@ export const registerFarmer = async (req, res) => {
       aadhaar,
       password: hashedPassword,
       cropType,
-      role: finalRole
+      role: finalRole,
     });
 
     const token = generateToken(farmer._id, farmer.role);
@@ -41,7 +45,7 @@ export const registerFarmer = async (req, res) => {
       mobile: farmer.mobile,
       role: farmer.role,
       cropType: farmer.cropType,
-      token
+      token,
     });
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -54,17 +58,19 @@ export const loginFarmer = async (req, res) => {
     const { mobile, password } = req.body;
 
     if (!mobile || !password) {
-      return res.status(400).json({ message: 'Mobile and password are required' });
+      return res
+        .status(400)
+        .json({ message: "Mobile and password are required" });
     }
 
     const farmer = await Farmer.findOne({ mobile });
     if (!farmer) {
-      return res.status(401).json({ message: 'Invalid mobile or password' });
+      return res.status(401).json({ message: "Invalid mobile or password" });
     }
 
     const isMatch = await bcrypt.compare(password, farmer.password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid mobile or password' });
+      return res.status(401).json({ message: "Invalid mobile or password" });
     }
 
     const token = generateToken(farmer._id, farmer.role);
@@ -75,9 +81,48 @@ export const loginFarmer = async (req, res) => {
       mobile: farmer.mobile,
       role: farmer.role,
       cropType: farmer.cropType,
-      token
+      token,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// Add this at the bottom of authController.js
+
+export const createAdmin = async (req, res) => {
+  try {
+    const { name, mobile, password, secretKey } = req.body;
+
+    if (secretKey !== process.env.ADMIN_SECRET) {
+      return res.status(403).json({ message: "Invalid secret key" });
+    }
+
+    if (!name || !mobile || !password) {
+      return res
+        .status(400)
+        .json({ message: "Name, mobile, and password are required" });
+    }
+
+    const existing = await Farmer.findOne({ mobile });
+    if (existing)
+      return res
+        .status(400)
+        .json({ message: "Already exists with this mobile" });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const admin = await Farmer.create({
+      name,
+      mobile,
+      password: hashedPassword,
+      role: "admin",
+    });
+
+    res.status(201).json({
+      message: "Admin created successfully",
+      admin: { name: admin.name, mobile: admin.mobile, role: admin.role },
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };
