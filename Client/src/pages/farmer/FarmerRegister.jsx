@@ -14,13 +14,13 @@ const CROP_VALUES = ["Wheat", "Rice", "Maize", "Mustard", "Other"];
 const COPY = {
   en: {
     brandSubtitle: "Kisan Mandi Portal",
-    homeLabel: "Farmer-SIH home",
+    homeLabel: "KisanSetu home",
     backLabel: "Back",
     languageLabel: "Choose language",
     useDarkMode: "Use dark mode",
     useLightMode: "Use light mode",
     heading: "Create your account",
-    subheading: "Enter your details to get started with Farmer-SIH.",
+    subheading: "Enter your details to get started with KisanSetu.",
     nameLabel: "Full Name",
     namePlaceholder: "Enter your full name",
     nameError: "Please enter your full name.",
@@ -186,7 +186,7 @@ export default function FarmerRegister() {
         onLanguageChange={setLanguage}
         theme={theme}
         onThemeToggle={toggleTheme}
-        backTo="/farmer/login"
+        backTo="/farmer/welcome"
       />
 
       <main className="farmer-shell farmer-auth" id="farmer-register-main">

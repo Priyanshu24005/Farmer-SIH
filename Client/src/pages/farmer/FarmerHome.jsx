@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -18,12 +18,8 @@ import {
 import useFarmerPreferences from "../../components/farmer/useFarmerPreferences";
 import FarmerBottomNav from "../../components/farmer/FarmerBottomNav";
 import { getFarmerProfile } from "../../components/farmer/farmerSession";
-import {
-  HAS_ACTIVE_TOKEN,
-  mockActiveToken,
-  mockRecentActivity,
-  mockStats,
-} from "../../components/farmer/dashboardData";
+import { getFarmerTokens, getMandiQueue } from "../../api/farmer/tokens";
+import { getFarmerPayments } from "../../api/farmer/payments";
 import "./farmerBase.css";
 import "./farmerHome.css";
 
@@ -36,7 +32,7 @@ const COPY = {
     notifications: "Notifications",
     profile: "Profile",
     greeting: (name) => `Namaste, ${name} 👋`,
-    welcomeBack: "Welcome back to Farmer-SIH",
+    welcomeBack: "Welcome back to KisanSetu",
     bookNewSlot: "Book New Slot",
     activeTokenTitle: "Your Active Token",
     statusWaiting: "Waiting",
@@ -102,6 +98,10 @@ function formatInr(value) {
   return `₹${value.toLocaleString("en-IN")}`;
 }
 
+function formatFarmerDate(value, language) {
+  return value ? new Date(value).toLocaleDateString(language === "hi" ? "hi-IN" : "en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—";
+}
+
 export default function FarmerHome() {
   const { language, setLanguage, theme, toggleTheme } = useFarmerPreferences();
   const navigate = useNavigate();
@@ -111,9 +111,53 @@ export default function FarmerHome() {
   // response. Falls back to a neutral label if not present.
   const profile = useMemo(() => getFarmerProfile(), []);
   const firstName = (profile?.name || "").trim().split(" ")[0] || copy.farmerFallback;
+  const farmerId = profile?.id || profile?._id;
+  const [dashboardState, setDashboardState] = useState("loading");
+  const [activeToken, setActiveToken] = useState(null);
+  const [tokens, setTokens] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [tokensAhead, setTokensAhead] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    if (!farmerId) {
+      setDashboardState("ready");
+      return () => { active = false; };
+    }
+    Promise.all([getFarmerTokens(farmerId), getFarmerPayments(farmerId)])
+      .then(async ([tokenResponse, paymentResponse]) => {
+        if (!active) return;
+        const tokenList = Array.isArray(tokenResponse) ? tokenResponse : tokenResponse?.tokens || [];
+        const paymentList = Array.isArray(paymentResponse) ? paymentResponse : paymentResponse?.payments || [];
+        const waitingToken = tokenList.find((token) => token.status === "waiting") || null;
+        setTokens(tokenList);
+        setPayments(paymentList);
+        setActiveToken(waitingToken);
+        if (waitingToken?.mandi?._id) {
+          try {
+            const queueResponse = await getMandiQueue(waitingToken.mandi._id);
+            const queue = Array.isArray(queueResponse) ? queueResponse : queueResponse?.queue || [];
+            if (active) setTokensAhead(queue.filter((token) => Number(token.tokenNumber) < Number(waitingToken.tokenNumber)).length);
+          } catch {
+            if (active) setTokensAhead(null);
+          }
+        }
+        if (active) setDashboardState("ready");
+      })
+      .catch(() => active && setDashboardState("error"));
+    return () => { active = false; };
+  }, [farmerId]);
 
   const nextThemeLabel = theme === "dark" ? copy.useLightMode : copy.useDarkMode;
-  const t = mockActiveToken;
+  const pendingPayments = payments.filter((payment) => payment.status === "pending");
+  const pendingAmount = pendingPayments.reduce((sum, payment) => sum + (payment.amount || 0), 0);
+  const recentActivity = useMemo(() => payments.slice(0, 3).map((payment) => ({
+    id: payment._id,
+    type: "payment",
+    title: payment.status === "paid" ? copy.activityTitles.paymentReceived : copy.pendingPayments,
+    detail: payment.amount != null ? formatInr(payment.amount) : copy.pendingPayments,
+    when: formatFarmerDate(payment.createdAt, language),
+  })), [copy.activityTitles.paymentReceived, copy.pendingPayments, language, payments]);
 
   return (
     <div className={`farmer-welcome farmer-welcome--${theme} farmer-home`} lang={language === "hi" ? "hi" : "en"}>
@@ -125,7 +169,7 @@ export default function FarmerHome() {
               <Sprout size={21} strokeWidth={2.35} />
             </span>
             <span>
-              <strong>Farmer-SIH</strong>
+              <strong>KisanSetu</strong>
               <span className="farmer-brand__subtitle">{copy.brandSubtitle}</span>
             </span>
           </span>
@@ -164,27 +208,30 @@ export default function FarmerHome() {
         </button>
 
         {/* Active token OR empty state */}
-        {HAS_ACTIVE_TOKEN ? (
+        {dashboardState === "loading" ? (
+          <section className="farmer-home__token" aria-live="polite"><h2>{copy.activeTokenTitle}</h2><p>{copy.welcomeBack}...</p></section>
+        ) : dashboardState === "error" ? (
+          <section className="farmer-home__empty" aria-live="polite"><span className="farmer-home__empty-icon"><PackageCheck size={26} /></span><h2>{copy.emptyTitle}</h2><p>{copy.emptyText}</p></section>
+        ) : activeToken ? (
           <section className="farmer-home__token" aria-labelledby="active-token-title">
             <div className="farmer-home__token-head">
               <h2 id="active-token-title">{copy.activeTokenTitle}</h2>
-              <span className="farmer-home__status" data-status={t.status}>
+              <span className="farmer-home__status" data-status={activeToken.status}>
                 <span className="farmer-home__status-dot" aria-hidden="true" />
-                {copy.statusWaiting}
+                {activeToken.status || copy.statusWaiting}
               </span>
             </div>
 
-            <div className="farmer-home__token-number">#{t.tokenNumber}</div>
+            <div className="farmer-home__token-number">#{activeToken.tokenNumber}</div>
 
             <ul className="farmer-home__token-meta">
-              <li><MapPin size={16} aria-hidden="true" /><span>{t.mandiName}</span></li>
-              <li><Wheat size={16} aria-hidden="true" /><span>{t.crop}</span></li>
-              <li><CalendarPlus size={16} aria-hidden="true" /><span>{t.date}</span></li>
+              <li><MapPin size={16} aria-hidden="true" /><span>{activeToken.mandi?.name || "Mandi not available"}</span></li>
+              <li><CalendarPlus size={16} aria-hidden="true" /><span>{formatFarmerDate(activeToken.date, language)}</span></li>
             </ul>
 
             <div className="farmer-home__token-wait">
-              <span className="farmer-home__ahead">{copy.tokensAhead(t.tokensAhead)}</span>
-              <span className="farmer-home__wait-time"><Clock size={15} aria-hidden="true" /> {copy.estWait(t.estimatedWaitMinutes)}</span>
+              <span className="farmer-home__ahead">{tokensAhead == null ? "—" : copy.tokensAhead(tokensAhead)}</span>
+              <span className="farmer-home__wait-time"><Clock size={15} aria-hidden="true" /> {tokensAhead == null ? "—" : copy.estWait(tokensAhead * 3)}</span>
             </div>
 
             <button type="button" className="farmer-home__secondary" onClick={() => navigate("/farmer/queue")}>
@@ -208,12 +255,12 @@ export default function FarmerHome() {
         <section className="farmer-home__stats" aria-label={`${copy.totalProcurements}, ${copy.pendingPayments}`}>
           <div className="farmer-home__stat">
             <span className="farmer-home__stat-icon" aria-hidden="true"><PackageCheck size={20} /></span>
-            <span className="farmer-home__stat-value">{mockStats.totalProcurements}</span>
+            <span className="farmer-home__stat-value">{tokens.filter((token) => token.status === "served").length}</span>
             <span className="farmer-home__stat-label">{copy.totalProcurements}</span>
           </div>
           <div className="farmer-home__stat">
             <span className="farmer-home__stat-icon farmer-home__stat-icon--amber" aria-hidden="true"><Wallet size={20} /></span>
-            <span className="farmer-home__stat-value">{formatInr(mockStats.pendingPaymentsInr)}</span>
+            <span className="farmer-home__stat-value">{formatInr(pendingAmount)}</span>
             <span className="farmer-home__stat-label">{copy.pendingPayments}</span>
           </div>
         </section>
@@ -228,16 +275,17 @@ export default function FarmerHome() {
             </button>
           </div>
           <ul className="farmer-home__activity-list">
-            {mockRecentActivity.map((item) => (
+            {recentActivity.length === 0 && <li><span className="farmer-home__activity-body"><small>{copy.emptyText}</small></span></li>}
+            {recentActivity.map((item) => (
               <li key={item.id}>
                 <span className={`farmer-home__activity-icon farmer-home__activity-icon--${item.type}`} aria-hidden="true">
                   {item.type === "payment" ? <Wallet size={18} /> : <PackageCheck size={18} />}
                 </span>
                 <span className="farmer-home__activity-body">
-                  <strong>{copy.activityTitles[item.titleKey]}</strong>
-                  <small>{language === "hi" ? item.detailHi : item.detail}</small>
+                  <strong>{item.title}</strong>
+                  <small>{item.detail}</small>
                 </span>
-                <span className="farmer-home__activity-when">{copy.when[item.whenKey]}</span>
+                <span className="farmer-home__activity-when">{item.when}</span>
               </li>
             ))}
           </ul>

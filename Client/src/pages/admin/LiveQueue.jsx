@@ -4,6 +4,7 @@ import { ListOrdered, Phone, Sprout, CheckCircle2, XCircle } from "lucide-react"
 import AdminLayout from "../../components/admin/AdminLayout";
 import { getMandis } from "../../api/admin/mandi";
 import { getQueue, updateTokenStatus } from "../../api/admin/token";
+import { LoadingRows, TableScroll, Badge } from "../../components/admin/ui";
 
 const POLL_INTERVAL_MS = 7000;
 
@@ -23,6 +24,7 @@ export default function LiveQueue() {
         setMandis(list);
         if (list.length) setSelectedMandi(list[0]._id);
       } catch {
+        // Keep the existing empty mandi state when the request fails.
       } finally {
         setLoadingMandis(false);
       }
@@ -39,6 +41,7 @@ export default function LiveQueue() {
         const data = await getQueue(selectedMandi);
         setQueue(Array.isArray(data) ? data : data.queue || []);
       } catch {
+        // Keep the existing queue state when polling fails.
       } finally {
         if (showSpinner) setLoadingQueue(false);
       }
@@ -56,6 +59,7 @@ export default function LiveQueue() {
       setQueue((prev) => prev.filter((t) => t._id !== tokenId));
       toast.success(status === "served" ? "Marked as served" : "Token cancelled");
     } catch {
+      // Keep the existing queue state when the status update fails.
     } finally {
       setActingOnId(null);
     }
@@ -109,11 +113,7 @@ export default function LiveQueue() {
             </p>
           </div>
         ) : loadingQueue ? (
-          <div className="p-8 space-y-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-14 rounded-xl bg-surface-soft animate-pulse" />
-            ))}
-          </div>
+          <LoadingRows count={3} />
         ) : queue.length === 0 ? (
           <div className="p-12 flex flex-col items-center text-center">
             <div className="w-12 h-12 rounded-full bg-accent-soft flex items-center justify-center mb-3">
@@ -125,7 +125,8 @@ export default function LiveQueue() {
             </p>
           </div>
         ) : (
-          <table className="w-full text-sm">
+          <TableScroll>
+          <table className="w-full text-sm min-w-[640px]">
             <thead>
               <tr className="text-left text-muted bg-surface-soft">
                 <th className="font-medium px-6 py-3">Token #</th>
@@ -135,10 +136,16 @@ export default function LiveQueue() {
               </tr>
             </thead>
             <tbody>
-              {queue.map((token) => (
-                <tr key={token._id} className="border-t border-border">
+              {queue.map((token, index) => (
+                <tr
+                  key={token._id}
+                  className={`border-t border-border ${index === 0 ? "bg-primary/[0.04]" : ""}`}
+                >
                   <td className="px-6 py-4 font-semibold text-ink">
-                    #{token.tokenNumber}
+                    <span className="inline-flex items-center gap-2">
+                      #{token.tokenNumber}
+                      {index === 0 && <Badge tone="success">Serving now</Badge>}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-ink">
                     {token.farmer?.name || "—"}
@@ -173,6 +180,7 @@ export default function LiveQueue() {
               ))}
             </tbody>
           </table>
+          </TableScroll>
         )}
       </div>
     </AdminLayout>

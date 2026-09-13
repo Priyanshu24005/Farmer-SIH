@@ -5,18 +5,7 @@ import {
 import AdminLayout from "../../components/admin/AdminLayout";
 import { getMandis } from "../../api/admin/mandi";
 import { getDashboardStats, getMandiStats } from "../../api/admin/analytics";
-
-function StatCard({ label, value, icon: Icon }) {
-  return (
-    <div className="bg-surface rounded-2xl border border-border border-t-2 border-t-accent p-5">
-      <div className="flex items-center gap-2 mb-3">
-        <Icon size={15} className="text-accent" />
-        <p className="text-muted text-sm">{label}</p>
-      </div>
-      <p className="font-display text-3xl font-semibold text-ink">{value}</p>
-    </div>
-  );
-}
+import { StatCard } from "../../components/admin/ui";
 
 export default function Analytics() {
   const [stats, setStats] = useState(null);
@@ -33,6 +22,7 @@ export default function Analytics() {
         const data = await getDashboardStats();
         setStats(data);
       } catch {
+        // Keep the existing empty statistics state when the request fails.
       } finally {
         setLoading(false);
       }
@@ -48,6 +38,7 @@ export default function Analytics() {
         setMandis(list);
         if (list.length) setSelectedMandi(list[0]._id);
       } catch {
+        // Keep the existing empty mandi state when the request fails.
       }
     };
     loadMandis();
@@ -61,6 +52,7 @@ export default function Analytics() {
         const data = await getMandiStats(selectedMandi);
         setMandiStats(data);
       } catch {
+        // Keep the existing empty mandi statistics state when the request fails.
       } finally {
         setLoadingMandiStats(false);
       }
@@ -80,24 +72,29 @@ export default function Analytics() {
             <div key={i} className="h-28 rounded-2xl bg-surface-soft animate-pulse" />
           ))}
         </div>
+      ) : !stats ? (
+        <div className="bg-surface rounded-2xl border border-border p-8 text-center mb-8">
+          <p className="text-muted text-sm">Couldn't load platform statistics.</p>
+        </div>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-            <StatCard label="Total farmers" value={stats.totalFarmers} icon={Users} />
-            <StatCard label="Total mandis" value={stats.totalMandis} icon={Sprout} />
+            <StatCard label="Total farmers" value={stats.totalFarmers} sub={`${stats.tokensToday} tokens today`} icon={Users} />
+            <StatCard label="Total mandis" value={stats.totalMandis} sub={`${stats.servedToday} served today`} icon={Sprout} />
             <StatCard
               label="Revenue paid out"
               value={`₹${(stats.totalRevenue || 0).toLocaleString("en-IN")}`}
+              sub={`${stats.paidPayments} payments settled`}
               icon={TrendingUp}
             />
-            <StatCard label="Tokens today" value={stats.tokensToday} icon={ListOrdered} />
+            <StatCard label="Tokens today" value={stats.tokensToday} sub="Across all mandis" icon={ListOrdered} />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <StatCard label="Served today" value={stats.servedToday} icon={CheckCircle2} />
-            <StatCard label="Waiting now" value={stats.waitingNow} icon={Clock} />
-            <StatCard label="Payments pending" value={stats.pendingPayments} icon={Wallet} />
-            <StatCard label="Payments paid" value={stats.paidPayments} icon={Wallet} />
+            <StatCard label="Served today" value={stats.servedToday} sub="Procurement logged" icon={CheckCircle2} />
+            <StatCard label="Waiting now" value={stats.waitingNow} sub="In queue now" icon={Clock} iconTone="amber" />
+            <StatCard label="Payments pending" value={stats.pendingPayments} sub="Awaiting settlement" icon={Wallet} iconTone="amber" />
+            <StatCard label="Payments paid" value={stats.paidPayments} sub="Settled to farmers" icon={Wallet} />
           </div>
         </>
       )}

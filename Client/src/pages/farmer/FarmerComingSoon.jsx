@@ -12,7 +12,7 @@ export default function FarmerComingSoon() {
         <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#e7f1d4] text-[#236b3f] dark:bg-[#1e4b32] dark:text-[#d7f1a2]">
           <Sprout size={27} aria-hidden="true" />
         </span>
-        <p className="mb-2 text-sm font-semibold uppercase tracking-[0.14em] text-[#5d8241] dark:text-[#bddb89]">Farmer-SIH</p>
+        <p className="mb-2 text-sm font-semibold uppercase tracking-[0.14em] text-[#5d8241] dark:text-[#bddb89]">KisanSetu</p>
         <h1 className="m-0 text-2xl font-bold">Coming soon</h1>
         <p className="mt-3 max-w-sm text-sm leading-6 text-[#58705f] dark:text-[#b4c6b8]">
           This Farmer feature will be added in an upcoming task.

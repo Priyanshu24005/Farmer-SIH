@@ -163,6 +163,38 @@
   color: var(--farm-primary);
 }
 
+/* Mandi Finder */
+.farmer-mandi-finder {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid var(--farm-line);
+  border-radius: 15px;
+  background: var(--farm-soft);
+}
+
+.farmer-mandi-finder__heading { display: flex; align-items: center; gap: 10px; }
+.farmer-mandi-finder__icon { display: grid; width: 36px; height: 36px; place-items: center; flex: 0 0 auto; border-radius: 10px; color: var(--farm-primary); background: var(--farm-surface); }
+.farmer-mandi-finder__heading h2 { margin: 0; color: var(--farm-text); font-size: .9rem; }
+.farmer-mandi-finder__heading p, .farmer-mandi-finder__manual-label { margin: 3px 0 0; color: var(--farm-muted); font-size: .72rem; }
+.farmer-mandi-finder__location { display: inline-flex; min-height: 41px; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--farm-primary); border-radius: 10px; color: var(--farm-primary); background: var(--farm-surface); font-size: .78rem; font-weight: 800; cursor: pointer; }
+.farmer-mandi-finder__location:hover, .farmer-mandi-finder__location:focus-visible { color: #fff; background: var(--farm-primary); }
+.farmer-mandi-finder__location:disabled { opacity: .6; cursor: wait; }
+.farmer-mandi-finder__message { margin: 0; color: var(--farm-muted); font-size: .72rem; line-height: 1.4; }
+.farmer-mandi-finder__message.is-success { color: var(--farm-primary); }
+.farmer-mandi-finder__retry { justify-self: start; padding: 0; border: 0; color: var(--farm-primary); background: transparent; font-size: .74rem; font-weight: 800; text-decoration: underline; cursor: pointer; }
+.farmer-mandi-finder__demo { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 10px; border: 1px dashed var(--farm-primary); border-radius: 10px; color: var(--farm-primary); background: var(--farm-surface); text-align: left; cursor: pointer; }
+.farmer-mandi-finder__demo:hover, .farmer-mandi-finder__demo:focus-visible { background: var(--farm-soft); }
+.farmer-mandi-finder__demo span { display: grid; gap: 2px; }
+.farmer-mandi-finder__demo strong { font-size: .74rem; }
+.farmer-mandi-finder__demo small { color: var(--farm-muted); font-size: .68rem; }
+.farmer-mandi-finder__fields { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.farmer-mandi-finder__fields label { display: grid; gap: 4px; min-width: 0; }
+.farmer-mandi-finder__fields label span { color: var(--farm-muted); font-size: .66rem; font-weight: 800; }
+.farmer-mandi-finder__fields input { width: 100%; min-height: 39px; min-width: 0; padding: 8px 9px; border: 1px solid var(--farm-line); border-radius: 9px; color: var(--farm-text); background: var(--farm-surface); outline: 0; font: inherit; font-size: .74rem; }
+.farmer-mandi-finder__fields input:focus { border-color: var(--farm-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--farm-primary) 14%, transparent); }
+
 /* Mandi List */
 .farmer-mandi-list {
   display: flex;
@@ -214,6 +246,20 @@
   font-size: 1rem;
   font-weight: 700;
 }
+
+.farmer-mandi-card__suggested {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 20px;
+  color: var(--farm-primary);
+  background: var(--farm-soft);
+  font-size: .66rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.farmer-mandi-card__demo { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 20px; color: var(--farm-muted); background: var(--farm-line); font-size: .66rem; font-weight: 800; white-space: nowrap; }
 
 .farmer-mandi-card__badge {
   display: inline-flex;
@@ -470,6 +516,10 @@
 .farmer-welcome--dark .farmer-token-badge {
   background: #03543f;
   color: #def7ec;
+}
+
+@media (max-width: 420px) {
+  .farmer-mandi-finder__fields { grid-template-columns: 1fr; }
 }
 
 .farmer-token-number-box {

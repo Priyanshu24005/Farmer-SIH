@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Calendar,
@@ -10,6 +10,7 @@ import {
   Clock,
   Loader2,
   MapPin,
+  Navigation,
   Sprout,
   Users,
   Wheat,
@@ -18,7 +19,7 @@ import {
 import FarmerAuthHeader from "../../components/farmer/FarmerAuthHeader";
 import useFarmerPreferences from "../../components/farmer/useFarmerPreferences";
 import { getFarmerProfile } from "../../components/farmer/farmerSession";
-import { getMandis } from "../../api/farmer/farmers";
+import { getMandiById, getMandis } from "../../api/farmer/farmers";
 import { bookToken } from "../../api/farmer/tokens";
 
 import "./farmerBase.css";
@@ -34,41 +35,33 @@ const CROP_OPTIONS = [
   { id: "Other", labelEn: "Other", labelHi: "अन्य", icon: Sprout },
 ];
 
-// Fallback mock mandis when server or DB has no records
-const FALLBACK_MANDIS = [
-  {
-    _id: "mock-mandi-1",
-    name: "Meerut Procurement Centre",
-    location: "Meerut, UP",
-    distanceKm: 4.2,
-    dailyCapacity: 150,
-    currentTokenCount: 65,
-    status: "available",
-  },
-  {
-    _id: "mock-mandi-2",
-    name: "Modinagar Krishi Mandi",
-    location: "Modinagar, UP",
-    distanceKm: 12.8,
-    dailyCapacity: 100,
-    currentTokenCount: 88,
-    status: "limited",
-  },
-  {
-    _id: "mock-mandi-3",
-    name: "Hapur Grain Market",
-    location: "Hapur, UP",
-    distanceKm: 18.5,
-    dailyCapacity: 80,
-    currentTokenCount: 80,
-    status: "full",
-  },
-];
+const DEHRADUN_APMC_NAMES = ["Vikasnagar APMC", "Dehradun APMC", "Rishikesh APMC", "Chakrata APMC"];
+const DEMO_LOCATION_TERMS = ["sudhowala", "dehradun", "248007"];
+const DEMO_MANDIS = DEHRADUN_APMC_NAMES.map((name) => ({
+  name,
+  location: "Dehradun district, Uttarakhand",
+  isDemoFallback: true,
+}));
+
+const getDemoMandis = (availableMandis) => {
+  const liveMandi = availableMandis.find((mandi) =>
+    /dehradun|dehradub/i.test([mandi.name, mandi.location].filter(Boolean).join(" "))
+  );
+
+  return liveMandi
+    ? [{
+      ...liveMandi,
+      name: DEMO_MANDIS[0].name,
+      location: DEMO_MANDIS[0].location,
+      isDemoFallback: false,
+    }]
+    : [];
+};
 
 const COPY = {
   en: {
     brandSubtitle: "Kisan Mandi Portal",
-    homeLabel: "Farmer-SIH home",
+    homeLabel: "KisanSetu home",
     backLabel: "Back",
     languageLabel: "Choose language",
     useDarkMode: "Use dark mode",
@@ -87,6 +80,7 @@ const COPY = {
     step4Subtitle: "Review your procurement details before generating your token.",
     successTitle: "Slot Booked Successfully!",
     successSubtitle: "Your token has been generated. Please report on time.",
+    demoSuccessSubtitle: "Demo booking complete. Connect live mandi data to receive a real token.",
     tokenLabel: "Your Token Number",
     reportingTime: "Reporting Time",
     reportingTimeVal: "09:00 AM – 11:00 AM",
@@ -109,6 +103,23 @@ const COPY = {
     legendLimited: "Limited",
     legendFull: "Full",
     bookingError: "Unable to confirm booking. Please try again.",
+    mandiError: "Unable to load mandis. Please try again.",
+    findMandi: "Find a nearby mandi",
+    useLocation: "Use my location",
+    locationEnabled: "Location permission enabled. Showing available mandi records.",
+    locationDenied: "Location is unavailable. You can still search by city, district, or PIN code.",
+    locationUnsupported: "Location is not supported here. You can still search manually.",
+    enterLocation: "Enter location manually",
+    city: "City",
+    district: "District",
+    pinCode: "PIN code",
+    searchMandis: "Search available mandis",
+    noMatchingMandis: "No mandis match this location yet.",
+    demoMandi: "Demo suggestion",
+    liveUnavailable: "Live mandi records are unavailable. Showing demo suggestions for now.",
+    demoBookingError: "This demo selection is ready to review, but live mandi data is needed to create a token.",
+    demoLocation: "Demo nearby location",
+    demoLocationValue: "Sudhowala, Dehradun · 248007",
   },
   hi: {
     brandSubtitle: "किसान मंडी पोर्टल",
@@ -131,6 +142,7 @@ const COPY = {
     step4Subtitle: "टोकन जनरेट करने से पहले अपनी खरीद विवरण की समीक्षा करें।",
     successTitle: "स्लॉट सफलतापूर्वक बुक हो गया!",
     successSubtitle: "आपका टोकन जनरेट हो चुका है। कृपया समय पर रिपोर्ट करें।",
+    demoSuccessSubtitle: "डेमो बुकिंग पूरी हुई। असली टोकन के लिए लाइव मंडी डेटा से कनेक्ट करें।",
     tokenLabel: "आपका टोकन नंबर",
     reportingTime: "रिपोर्टिंग समय",
     reportingTimeVal: "सुबह 09:00 – 11:00",
@@ -153,6 +165,23 @@ const COPY = {
     legendLimited: "सीमित",
     legendFull: "पूर्ण",
     bookingError: "बुकिंग की पुष्टि नहीं हो सकी। कृपया पुनः प्रयास करें।",
+    mandiError: "मंडियां लोड नहीं हो सकीं। कृपया पुनः प्रयास करें।",
+    findMandi: "नज़दीकी मंडी खोजें",
+    useLocation: "मेरी लोकेशन का उपयोग करें",
+    locationEnabled: "लोकेशन की अनुमति मिल गई। उपलब्ध मंडी रिकॉर्ड दिखाए जा रहे हैं।",
+    locationDenied: "लोकेशन उपलब्ध नहीं है। आप शहर, ज़िले या पिन कोड से खोज सकते हैं।",
+    locationUnsupported: "यहां लोकेशन समर्थित नहीं है। आप मैन्युअल रूप से खोज सकते हैं।",
+    enterLocation: "लोकेशन मैन्युअल रूप से लिखें",
+    city: "शहर",
+    district: "ज़िला",
+    pinCode: "पिन कोड",
+    searchMandis: "उपलब्ध मंडियां खोजें",
+    noMatchingMandis: "इस लोकेशन से मेल खाती मंडी नहीं मिली।",
+    demoMandi: "डेमो सुझाव",
+    liveUnavailable: "लाइव मंडी रिकॉर्ड उपलब्ध नहीं हैं। अभी डेमो सुझाव दिखाए जा रहे हैं।",
+    demoBookingError: "यह डेमो चयन समीक्षा के लिए तैयार है, लेकिन टोकन बनाने के लिए लाइव मंडी डेटा चाहिए।",
+    demoLocation: "डेमो नज़दीकी लोकेशन",
+    demoLocationValue: "सुधोवाला, देहरादून · 248007",
   },
 };
 
@@ -168,7 +197,7 @@ export default function FarmerBookSlot() {
 
   // Booking selections
   const [selectedCrop, setSelectedCrop] = useState("");
-  const [selectedMandi, setSelectedMandi] = useState(null);
+  const [selectedMandi, setSelectedMandi] = useState(DEMO_MANDIS[0]);
   const [selectedDate, setSelectedDate] = useState(null);
 
   // Calendar month state
@@ -178,8 +207,14 @@ export default function FarmerBookSlot() {
   });
 
   // Mandis API state
-  const [mandis, setMandis] = useState([]);
+  const [mandis, setMandis] = useState(DEMO_MANDIS);
   const [loadingMandis, setLoadingMandis] = useState(false);
+  const [mandiSource, setMandiSource] = useState("demo");
+  const [mandiError, setMandiError] = useState(false);
+  const [selectingMandiId, setSelectingMandiId] = useState(null);
+  const [locationStatus, setLocationStatus] = useState("idle");
+  const [userCoordinates, setUserCoordinates] = useState(null);
+  const [manualLocation, setManualLocation] = useState({ city: "Dehradun", district: "", pinCode: "248007" });
 
   // Booking submit state
   const [submitting, setSubmitting] = useState(false);
@@ -187,6 +222,70 @@ export default function FarmerBookSlot() {
   const [bookingError, setBookingError] = useState("");
 
   const farmerProfile = useMemo(() => getFarmerProfile(), []);
+
+  const locationTerms = useMemo(
+    () => Object.values(manualLocation).map((value) => value.trim().toLowerCase()).filter(Boolean),
+    [manualLocation]
+  );
+
+  const isDemoLocation = locationTerms.some((term) => DEMO_LOCATION_TERMS.some((demoTerm) => term.includes(demoTerm)));
+
+  const getCoordinates = (mandi) => {
+    const latitude = Number(mandi.latitude ?? mandi.coordinates?.latitude ?? mandi.coordinates?.lat);
+    const longitude = Number(mandi.longitude ?? mandi.coordinates?.longitude ?? mandi.coordinates?.lng);
+    return Number.isFinite(latitude) && Number.isFinite(longitude) ? { latitude, longitude } : null;
+  };
+
+  const distanceSquared = (first, second) => ((first.latitude - second.latitude) ** 2) + ((first.longitude - second.longitude) ** 2);
+
+  const visibleMandis = useMemo(() => {
+    if (isDemoLocation) return getDemoMandis(mandis);
+
+    const matches = locationTerms.length === 0 ? mandis : mandis.filter((mandi) => {
+      const haystack = [mandi.name, mandi.location, mandi.address, mandi.city, mandi.district, mandi.pinCode, mandi.pincode]
+        .filter(Boolean).join(" ").toLowerCase();
+      return locationTerms.some((term) => haystack.includes(term));
+    });
+
+    return [...matches].sort((first, second) => {
+      if (userCoordinates) {
+        const firstCoordinates = getCoordinates(first);
+        const secondCoordinates = getCoordinates(second);
+        if (firstCoordinates && secondCoordinates) return distanceSquared(firstCoordinates, userCoordinates) - distanceSquared(secondCoordinates, userCoordinates);
+        if (firstCoordinates) return -1;
+        if (secondCoordinates) return 1;
+      }
+      if (isDemoLocation) {
+        const firstRank = DEHRADUN_APMC_NAMES.findIndex((name) => first.name?.toLowerCase() === name.toLowerCase());
+        const secondRank = DEHRADUN_APMC_NAMES.findIndex((name) => second.name?.toLowerCase() === name.toLowerCase());
+        return (firstRank < 0 ? DEHRADUN_APMC_NAMES.length : firstRank) - (secondRank < 0 ? DEHRADUN_APMC_NAMES.length : secondRank);
+      }
+      return 0;
+    });
+  }, [isDemoLocation, locationTerms, mandis, userCoordinates]);
+
+  const handleUseLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationStatus("unsupported");
+      return;
+    }
+    setLocationStatus("requesting");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setUserCoordinates({ latitude, longitude });
+        setLocationStatus("available");
+      },
+      () => setLocationStatus("denied"),
+      { enableHighAccuracy: false, maximumAge: 300000, timeout: 8000 }
+    );
+  };
+
+  const handleDemoLocation = () => {
+    setManualLocation({ city: "Sudhowala", district: "Dehradun", pinCode: "248007" });
+    setSelectedMandi(getDemoMandis(mandis)[0] || null);
+    setLocationStatus("idle");
+  };
 
   // Fetch real mandis on mount or when reaching step 2
   useEffect(() => {
@@ -197,29 +296,26 @@ export default function FarmerBookSlot() {
         const data = await getMandis();
         const list = Array.isArray(data) ? data : data?.mandis || [];
         if (isMounted) {
-          if (list.length > 0) {
-            // Map real mandi records with status computed from capacity
-            const mapped = list.map((m, idx) => {
-              const cap = m.dailyCapacity || 100;
-              const count = m.currentTokenCount || 0;
-              const isFull = count >= cap;
-              const isLimited = count >= cap * 0.75;
-              const status = isFull ? "full" : isLimited ? "limited" : "available";
-              return {
-                ...m,
-                distanceKm: (idx + 1) * 4.5,
-                status,
-              };
-            });
-            setMandis(mapped);
-          } else {
-            setMandis(FALLBACK_MANDIS);
-          }
+          const nextMandis = list.length ? list.map((m) => {
+            const capacity = Number(m.dailyCapacity);
+            const count = Number(m.currentTokenCount || 0);
+            const status = Number.isFinite(capacity) && capacity > 0
+              ? count >= capacity ? "full" : count >= capacity * 0.75 ? "limited" : "available"
+              : undefined;
+            return { ...m, status };
+          }) : [];
+          const demoMandis = isDemoLocation ? getDemoMandis(nextMandis) : [];
+          setMandis(nextMandis);
+          setMandiSource(list.length ? "live" : "demo");
+          setSelectedMandi(isDemoLocation ? demoMandis[0] || null : list[0] || null);
+          setMandiError(false);
         }
-      } catch (err) {
-        console.warn("[FarmerBookSlot] Real mandi API unavailable, using fallback:", err.message);
+      } catch {
         if (isMounted) {
-          setMandis(FALLBACK_MANDIS);
+          setMandis(DEMO_MANDIS);
+          setMandiSource("demo");
+          setSelectedMandi(DEMO_MANDIS[0]);
+          setMandiError(true);
         }
       } finally {
         if (isMounted) setLoadingMandis(false);
@@ -229,7 +325,30 @@ export default function FarmerBookSlot() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [isDemoLocation]);
+
+  const handleMandiSelect = async (mandi) => {
+    if (mandi.status === "full") return;
+    if (!mandi._id) {
+      setSelectedMandi(mandi);
+      return;
+    }
+    setSelectingMandiId(mandi._id);
+    setMandiError(false);
+    try {
+      const details = await getMandiById(mandi._id);
+      const capacity = Number(details.dailyCapacity);
+      const count = Number(details.currentTokenCount || 0);
+      const status = Number.isFinite(capacity) && capacity > 0
+        ? count >= capacity ? "full" : count >= capacity * 0.75 ? "limited" : "available"
+        : undefined;
+      setSelectedMandi({ ...mandi, ...details, status });
+    } catch {
+      setMandiError(true);
+    } finally {
+      setSelectingMandiId(null);
+    }
+  };
 
   // Handle header back navigation
   const handleBack = () => {
@@ -266,18 +385,12 @@ export default function FarmerBookSlot() {
       const isPast = dateObj < today;
       const isToday = dateObj.getTime() === today.getTime();
 
-      // Mock availability logic (Sundays full, others mostly available)
-      const dayOfWeek = dateObj.getDay();
-      let availability = "available";
-      if (dayOfWeek === 0) availability = "full";
-      else if (d % 4 === 0) availability = "limited";
-
       days.push({
         dayNumber: d,
         dateObj,
         isPast,
         isToday,
-        availability,
+        availability: "available",
       });
     }
 
@@ -292,6 +405,14 @@ export default function FarmerBookSlot() {
     setCurrentMonth((curr) => new Date(curr.getFullYear(), curr.getMonth() + 1, 1));
   };
 
+  const formatApiDate = (date) => {
+    if (!date) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   // Confirm booking handler
   const handleConfirmBooking = async () => {
     setSubmitting(true);
@@ -299,36 +420,22 @@ export default function FarmerBookSlot() {
 
     const farmerId = farmerProfile?._id || farmerProfile?.id;
     const mandiId = selectedMandi?._id;
-    const bookingDateStr = selectedDate ? selectedDate.toISOString() : new Date().toISOString();
-
-    let createdToken = null;
-
-    // If we have a valid MongoDB farmerId and mandiId, attempt real POST /api/tokens
-    if (farmerId && mandiId && /^[0-9a-fA-F]{24}$/.test(farmerId) && /^[0-9a-fA-F]{24}$/.test(mandiId)) {
-      try {
-        createdToken = await bookToken({
-          farmer: farmerId,
-          mandi: mandiId,
-          date: bookingDateStr,
-        });
-      } catch (err) {
-        console.warn("[FarmerBookSlot] Real token API call failed, falling back to mock token:", err.message);
-      }
+    const bookingDateStr = formatApiDate(selectedDate);
+    if (!farmerId || !/^[0-9a-fA-F]{24}$/.test(farmerId) || !mandiId || !/^[0-9a-fA-F]{24}$/.test(mandiId) || !bookingDateStr) {
+      setBookingError(selectedMandi?.isDemoFallback ? copy.demoBookingError : copy.bookingError);
+      setSubmitting(false);
+      return;
     }
 
-    // If real token wasn't generated (mock/offline environment or missing farmerId)
-    if (!createdToken) {
-      createdToken = {
-        _id: "tok-" + Date.now(),
-        tokenNumber: "A104",
-        date: bookingDateStr,
-        status: "waiting",
-      };
+    try {
+      const createdToken = await bookToken({ farmer: farmerId, mandi: mandiId, date: bookingDateStr });
+      setBookingResult(createdToken);
+      setStep(5);
+    } catch (err) {
+      setBookingError(err.response?.data?.message || copy.bookingError);
+    } finally {
+      setSubmitting(false);
     }
-
-    setBookingResult(createdToken);
-    setStep(5);
-    setSubmitting(false);
   };
 
   const formatDisplayDate = (d) => {
@@ -468,23 +575,39 @@ export default function FarmerBookSlot() {
                 <p>{copy.step2Subtitle}</p>
               </div>
 
+              <section className="farmer-mandi-finder" aria-label={copy.findMandi}>
+                <div className="farmer-mandi-finder__heading"><span className="farmer-mandi-finder__icon"><Navigation size={18} /></span><div><h2>{copy.findMandi}</h2><p>{copy.searchMandis}</p></div></div>
+                <button type="button" className="farmer-mandi-finder__location" onClick={handleUseLocation} disabled={locationStatus === "requesting"}><Navigation size={16} /> {locationStatus === "requesting" ? copy.loadingMandis : copy.useLocation}</button>
+                {locationStatus === "available" && <p className="farmer-mandi-finder__message is-success">{copy.locationEnabled}</p>}
+                {locationStatus === "denied" && <p className="farmer-mandi-finder__message">{copy.locationDenied}</p>}
+                {locationStatus === "unsupported" && <p className="farmer-mandi-finder__message">{copy.locationUnsupported}</p>}
+                <p className="farmer-mandi-finder__manual-label">{copy.enterLocation}</p>
+                <button type="button" className="farmer-mandi-finder__demo" onClick={handleDemoLocation}><MapPin size={15} /> <span><strong>{copy.demoLocation}</strong><small>{copy.demoLocationValue}</small></span></button>
+                <div className="farmer-mandi-finder__fields">
+                  {[["city", copy.city], ["district", copy.district], ["pinCode", copy.pinCode]].map(([field, label]) => <label key={field}><span>{label}</span><input value={manualLocation[field]} onChange={(event) => setManualLocation((current) => ({ ...current, [field]: event.target.value }))} placeholder={label} inputMode={field === "pinCode" ? "numeric" : "text"} /></label>)}
+                </div>
+                {mandiSource === "demo" && <p className="farmer-mandi-finder__message">{copy.liveUnavailable}</p>}
+                {mandiError && <button type="button" className="farmer-mandi-finder__retry" onClick={() => window.location.reload()}>Retry</button>}
+              </section>
+
               {loadingMandis ? (
                 <div style={{ padding: "36px 0", textAlign: "center", color: "var(--farm-muted)" }}>
                   <Loader2 size={28} className="farmer-spin" style={{ margin: "0 auto 12px" }} />
                   <p>{copy.loadingMandis}</p>
                 </div>
-              ) : mandis.length === 0 ? (
+              ) : visibleMandis.length === 0 ? (
                 <div style={{ padding: "28px 0", textAlign: "center", color: "var(--farm-muted)" }}>
-                  <p>{copy.noMandis}</p>
+                  <p>{mandis.length === 0 ? copy.noMandis : copy.noMatchingMandis}</p>
                 </div>
               ) : (
                 <div className="farmer-mandi-list">
-                  {mandis.map((mandi) => {
-                    const isSelected = selectedMandi?._id === mandi._id;
+                  {visibleMandis.map((mandi) => {
+                    const isSelected = mandi._id ? selectedMandi?._id === mandi._id : selectedMandi === mandi;
                     const isFull = mandi.status === "full";
+                    const isSuggested = isDemoLocation && DEHRADUN_APMC_NAMES.some((name) => name.toLowerCase() === mandi.name?.toLowerCase());
 
-                    let badgeClass = "farmer-mandi-card__badge--available";
-                    let badgeLabel = copy.mandiStatusAvailable;
+                    let badgeClass = "";
+                    let badgeLabel = "";
                     if (mandi.status === "limited") {
                       badgeClass = "farmer-mandi-card__badge--limited";
                       badgeLabel = copy.mandiStatusLimited;
@@ -495,28 +618,30 @@ export default function FarmerBookSlot() {
 
                     return (
                       <button
-                        key={mandi._id}
+                        key={mandi._id || mandi.name}
                         type="button"
-                        disabled={isFull}
+                        disabled={isFull || selectingMandiId === mandi._id}
                         className={`farmer-mandi-card ${isSelected ? "is-selected" : ""} ${isFull ? "is-disabled" : ""}`}
-                        onClick={() => !isFull && setSelectedMandi(mandi)}
+                        onClick={() => !isFull && handleMandiSelect(mandi)}
                         aria-pressed={isSelected}
                       >
                         <div className="farmer-mandi-card__header">
                           <span className="farmer-mandi-card__name">{mandi.name}</span>
-                          <span className={`farmer-mandi-card__badge ${badgeClass}`}>
+                          {isSuggested && <span className="farmer-mandi-card__suggested">Suggested for your location</span>}
+                          {mandi.isDemoFallback && <span className="farmer-mandi-card__demo">{copy.demoMandi}</span>}
+                          {!mandi.isDemoFallback && <span className={`farmer-mandi-card__badge ${badgeClass}`}>
                             {badgeLabel}
-                          </span>
+                          </span>}
                         </div>
 
                         <div className="farmer-mandi-card__meta">
                           <span className="farmer-mandi-card__meta-item">
                             <MapPin size={14} />
-                            <span>{mandi.location} ({mandi.distanceKm || 5} km)</span>
+                            <span>{mandi.location}</span>
                           </span>
                           <span className="farmer-mandi-card__meta-item">
                             <Users size={14} />
-                            <span>{copy.dailyCapacity}: {mandi.dailyCapacity || 100}</span>
+                            {mandi.dailyCapacity != null && <span>{copy.dailyCapacity}: {mandi.dailyCapacity}</span>}
                           </span>
                         </div>
                       </button>
@@ -538,7 +663,9 @@ export default function FarmerBookSlot() {
                   type="button"
                   className="farmer-primary-cta"
                   style={{ width: "65%" }}
-                  disabled={!selectedMandi}
+                  disabled={!selectedMandi || !visibleMandis.some((mandi) =>
+                    mandi === selectedMandi || (mandi._id && mandi._id === selectedMandi._id)
+                  )}
                   onClick={() => setStep(3)}
                 >
                   {copy.continueCta}
@@ -741,14 +868,14 @@ export default function FarmerBookSlot() {
                 {copy.successTitle}
               </h1>
               <p style={{ margin: "0 auto", color: "var(--farm-muted)", fontSize: "0.95rem", maxWidth: "380px" }}>
-                {copy.successSubtitle}
+                {bookingResult?.demo ? copy.demoSuccessSubtitle : copy.successSubtitle}
               </p>
 
               {/* Large Token Box */}
               <div className="farmer-token-number-box">
                 <div className="farmer-token-number-label">{copy.tokenLabel}</div>
                 <div className="farmer-token-number">
-                  #{bookingResult?.tokenNumber || "A104"}
+                  #{bookingResult?.tokenNumber || "—"}
                 </div>
               </div>
 

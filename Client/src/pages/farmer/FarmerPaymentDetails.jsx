@@ -1,4 +1,4 @@
-import { createElement, useMemo, useState } from "react";
+import { createElement, useEffect, useState } from "react";
 import {
   ArrowRight,
   BadgeCheck,
@@ -21,17 +21,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import FarmerAuthHeader from "../../components/farmer/FarmerAuthHeader";
 import FarmerBottomNav from "../../components/farmer/FarmerBottomNav";
 import useFarmerPreferences from "../../components/farmer/useFarmerPreferences";
-import {
-  getMockPaymentDetails,
-  PAYMENT_DETAIL_STATUSES,
-} from "../../components/farmer/paymentDetailsData";
+import { getPaymentById } from "../../api/farmer/payments";
 import "./farmerBase.css";
 import "./farmerPaymentDetails.css";
 
 const COPY = {
   en: {
     brandSubtitle: "Kisan Mandi Portal",
-    homeLabel: "Farmer-SIH home",
+    homeLabel: "KisanSetu home",
     backLabel: "Back",
     languageLabel: "Choose language",
     useDarkMode: "Use dark mode",
@@ -167,9 +164,46 @@ export default function FarmerPaymentDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const copy = COPY[language] || COPY.en;
-  const record = useMemo(() => getMockPaymentDetails(id), [id]);
+  const [record, setRecord] = useState(null);
+  const [state, setState] = useState("loading");
   const [receiptMessage, setReceiptMessage] = useState("");
   const [helpMessage, setHelpMessage] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    getPaymentById(id)
+      .then((payment) => {
+        if (!active) return;
+        const token = payment.token || {};
+        setRecord({
+          status: payment.status,
+          amount: payment.amount != null ? `₹${payment.amount.toLocaleString("en-IN")}` : copy.notAvailable,
+          paymentDate: payment.paidAt ? new Date(payment.paidAt).toLocaleDateString(language === "hi" ? "hi-IN" : "en-IN") : null,
+          method: null,
+          account: null,
+          transactionId: null,
+          referenceNumber: null,
+          crop: null,
+          quantity: payment.quantityKg != null ? `${payment.quantityKg} kg` : null,
+          qualityGrade: payment.qualityGrade ? `Grade ${payment.qualityGrade}` : null,
+          mandi: token.mandi?.name || null,
+          procurementDate: token.date ? new Date(token.date).toLocaleDateString(language === "hi" ? "hi-IN" : "en-IN") : null,
+          token: token.tokenNumber,
+          procurementId: token._id,
+        });
+        setState("ready");
+      })
+      .catch(() => active && setState("error"));
+    return () => { active = false; };
+  }, [copy.notAvailable, id, language]);
+
+  if (state === "loading") {
+    return <div className={`farmer-welcome farmer-welcome--${theme} farmer-payment-details`} lang={language === "hi" ? "hi" : "en"}><FarmerAuthHeader copy={copy} language={language} onLanguageChange={setLanguage} theme={theme} onThemeToggle={toggleTheme} backTo="/farmer/payments" /><main className="farmer-shell farmer-payment-details__not-found"><Loader2 size={28} className="farmer-spin" /><h1>Loading payment details...</h1></main></div>;
+  }
+
+  if (state === "error") {
+    return <div className={`farmer-welcome farmer-welcome--${theme} farmer-payment-details`} lang={language === "hi" ? "hi" : "en"}><FarmerAuthHeader copy={copy} language={language} onLanguageChange={setLanguage} theme={theme} onThemeToggle={toggleTheme} backTo="/farmer/payments" /><main className="farmer-shell farmer-payment-details__not-found"><span className="farmer-payment-details__not-found-icon"><CircleAlert size={28} /></span><h1>{copy.notFound}</h1><p>{copy.notFoundText}</p><button type="button" className="farmer-primary-cta" onClick={() => navigate("/farmer/payments")}><ArrowRight size={17} /> {copy.backToPayments}</button></main></div>;
+  }
 
   if (!record) {
     return (
@@ -197,7 +231,7 @@ export default function FarmerPaymentDetails() {
       <main className="farmer-shell farmer-payment-details__main" id="farmer-payment-details-main">
         <header className="farmer-payment-details__heading">
           <div>
-            <p className="farmer-payment-details__eyebrow"><CreditCard size={15} /> Farmer-SIH</p>
+            <p className="farmer-payment-details__eyebrow"><CreditCard size={15} /> KisanSetu</p>
             <h1>{copy.title}</h1>
           </div>
           <span className="farmer-payment-details__heading-icon" aria-hidden="true"><Banknote size={23} /></span>
@@ -220,26 +254,26 @@ export default function FarmerPaymentDetails() {
 
         <div className="farmer-payment-details__columns">
           <PaymentCard title={copy.paymentMethod} icon={Banknote} className="farmer-payment-details__method-card">
-            <div className="farmer-payment-details__method-main"><span className="farmer-payment-details__method-icon"><Banknote size={20} /></span><strong>{language === "hi" ? record.methodHindi || copy.dbt : record.method || copy.dbt}</strong></div>
-            <DetailRow icon={CreditCard} label={copy.bankAccount} value={record.account || copy.notAvailable} />
+            <div className="farmer-payment-details__method-main"><span className="farmer-payment-details__method-icon"><Banknote size={20} /></span><strong>{copy.notAvailable}</strong></div>
+              <DetailRow icon={CreditCard} label={copy.bankAccount} value={copy.notAvailable} />
           </PaymentCard>
 
           <PaymentCard title={copy.transactionDetails} icon={FileText}>
-            <DetailRow icon={Receipt} label={copy.transactionId} value={record.transactionId || copy.notAvailable} />
-            <DetailRow icon={FileText} label={copy.referenceNumber} value={record.referenceNumber || copy.notAvailable} />
+            <DetailRow icon={Receipt} label={copy.transactionId} value={copy.notAvailable} />
+            <DetailRow icon={FileText} label={copy.referenceNumber} value={copy.notAvailable} />
             <DetailRow icon={CalendarDays} label={copy.paymentDate} value={record.paymentDate || copy.notAvailable} />
             <DetailRow icon={BadgeCheck} label={copy.paymentStatus} value={record.status === "paid" ? copy.successful : copy[status.label]} />
           </PaymentCard>
         </div>
 
         <PaymentCard title={copy.relatedProcurement} icon={PackageCheck} className="farmer-payment-details__procurement-card">
-          <div className="farmer-payment-details__procurement-top"><span className="farmer-payment-details__crop-icon"><Wheat size={21} /></span><strong>{record.crop} <small>({record.cropHindi})</small></strong></div>
+          <div className="farmer-payment-details__procurement-top"><span className="farmer-payment-details__crop-icon"><Wheat size={21} /></span><strong>{copy.notAvailable}</strong></div>
           <div className="farmer-payment-details__procurement-grid">
-            <DetailRow icon={PackageCheck} label={copy.quantity} value={record.quantity} />
-            <DetailRow icon={BadgeCheck} label={copy.qualityGrade} value={record.qualityGrade} />
-            <DetailRow icon={MapPin} label={copy.mandi} value={record.mandi} />
-            <DetailRow icon={CalendarDays} label={copy.procurementDate} value={record.procurementDate} />
-            <DetailRow icon={Receipt} label={copy.token} value={`#${record.token}`} />
+            <DetailRow icon={PackageCheck} label={copy.quantity} value={record.quantity || copy.notAvailable} />
+            <DetailRow icon={BadgeCheck} label={copy.qualityGrade} value={record.qualityGrade || copy.notAvailable} />
+            <DetailRow icon={MapPin} label={copy.mandi} value={record.mandi || copy.notAvailable} />
+            <DetailRow icon={CalendarDays} label={copy.procurementDate} value={record.procurementDate || copy.notAvailable} />
+            <DetailRow icon={Receipt} label={copy.token} value={record.token != null ? `#${record.token}` : copy.notAvailable} />
           </div>
           <button type="button" className="farmer-payment-details__outline-button" onClick={() => navigate(`/farmer/procurement/${record.procurementId}`)}>
             {copy.viewProcurement} <ArrowRight size={16} />

@@ -15,6 +15,13 @@
   --color-accent: #B7791F;
   --color-accent-soft: #E8D9B5;
   --color-highlight: #FFFFFF;
+  /* RGB triplets for the Tailwind <alpha-value> pattern so opacity
+     modifiers (bg-primary/10, focus:ring-primary/20, …) work with the
+     CSS-variable theme. Bare utilities resolve to alpha 1, i.e. the
+     exact hex values above. */
+  --color-primary-rgb: 30 70 53;
+  --color-accent-rgb: 183 121 31;
+  --color-accent-soft-rgb: 232 217 181;
 }
 
 .dark {
@@ -30,4 +37,26 @@
   --color-accent: #D9A441;
   --color-accent-soft: #D9A441;
   --color-highlight: #D9A441;
+  --color-primary-rgb: 217 164 65;
+  --color-accent-rgb: 217 164 65;
+  --color-accent-soft-rgb: 217 164 65;
+}
+
+/* Admin dark theme stays green; Farmer pages continue using the global theme. */
+.dark .admin-theme {
+  --color-bg: #0d1813;
+  --color-surface: #17251e;
+  --color-surface-soft: #21342a;
+  --color-border: rgba(151, 187, 164, 0.16);
+  --color-ink: #edf5ef;
+  --color-muted: #a8b9ad;
+  --color-sidebar: #07120d;
+  --color-primary: #76b58c;
+  --color-on-primary: #08130d;
+  --color-accent: #9bc7a8;
+  --color-accent-soft: #315a43;
+  --color-highlight: #9bc7a8;
+  --color-primary-rgb: 118 181 140;
+  --color-accent-rgb: 155 199 168;
+  --color-accent-soft-rgb: 49 90 67;
 }

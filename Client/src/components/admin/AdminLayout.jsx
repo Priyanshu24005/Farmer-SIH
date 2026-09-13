@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { createElement, useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutGrid, Users, ListOrdered, ClipboardList, Wallet,
   BarChart2, Bell, LogOut, Search, Sprout, Sun, Moon, X, CheckCircle2,
+  Menu,
 } from "lucide-react";
 import { getDashboardStats } from "../../api/admin/analytics";
 
@@ -16,10 +17,72 @@ const NAV_ITEMS = [
   { to: "/admin/farmers", label: "Farmers", icon: Users },
 ];
 
+function SidebarBody({ onNavigate }) {
+  return (
+    <>
+      <div className="flex items-center gap-3 px-5 py-6">
+        <div className="w-10 h-10 rounded-xl bg-accent-soft flex items-center justify-center shrink-0">
+          <Sprout size={20} className="text-sidebar" />
+        </div>
+        <div className="min-w-0">
+          <p className="font-semibold leading-tight text-[15px] text-white">
+            KisanSetu
+          </p>
+          <p className="text-xs text-white/60 leading-tight">Admin workspace</p>
+        </div>
+      </div>
+
+      <nav className="flex-1 px-3 mt-1 space-y-1 overflow-y-auto" aria-label="Admin navigation">
+        {NAV_ITEMS.map(({ to, label, icon }) => (
+          <NavLink
+            key={to}
+            to={to}
+            onClick={onNavigate}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                isActive
+                  ? "bg-white/10 font-semibold text-white"
+                  : "text-white/70 hover:bg-white/5 hover:text-white"
+              }`
+            }
+          >
+            {createElement(icon, { size: 18, className: "shrink-0" })}
+            <span className="truncate">{label}</span>
+          </NavLink>
+        ))}
+      </nav>
+
+      <LogoutButton />
+    </>
+  );
+}
+
+function LogoutButton() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("user");
+    navigate("/admin/login", { replace: true });
+  };
+
+  return (
+    <button
+      onClick={handleLogout}
+      className="flex items-center gap-3 px-6 py-5 text-sm text-white/70 hover:text-white border-t border-white/10 w-full"
+    >
+      <LogOut size={18} className="shrink-0" />
+      Logout
+    </button>
+  );
+}
+
 export default function AdminLayout({ title, eyebrow, actions, children }) {
   const navigate = useNavigate();
   const searchRef = useRef(null);
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDark, setIsDark] = useState(
     () => localStorage.getItem("theme") === "dark"
   );
@@ -41,6 +104,7 @@ export default function AdminLayout({ title, eyebrow, actions, children }) {
         const data = await getDashboardStats();
         setStats(data);
       } catch {
+        // Preserve the existing empty notification state when stats are unavailable.
       }
     };
     load();
@@ -79,12 +143,6 @@ export default function AdminLayout({ title, eyebrow, actions, children }) {
     role: "Mandi official",
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/admin/login");
-  };
-
   const searchResults = NAV_ITEMS.filter((item) =>
     item.label.toLowerCase().includes(searchQuery.trim().toLowerCase())
   );
@@ -97,50 +155,36 @@ export default function AdminLayout({ title, eyebrow, actions, children }) {
   };
 
   return (
-    <div className="min-h-screen flex bg-bg">
-      <aside className="w-64 shrink-0 bg-sidebar text-white flex flex-col">
-        <div className="flex items-center gap-3 px-6 py-6">
-          <div className="w-10 h-10 rounded-lg bg-accent-soft flex items-center justify-center">
-            <Sprout size={20} className="text-sidebar" />
-          </div>
-          <div>
-            <p className="font-display font-semibold leading-tight text-lg">
-              Farmer-SIH
-            </p>
-            <p className="text-xs text-white/60 leading-tight">Admin workspace</p>
-          </div>
-        </div>
-
-        <nav className="flex-1 px-3 mt-2 space-y-1">
-          {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                  isActive
-                    ? "bg-accent-soft/20 font-semibold text-highlight"
-                    : "text-white/75 hover:bg-white/5 hover:text-white"
-                }`
-              }
-            >
-              <Icon size={18} />
-              {label}
-            </NavLink>
-          ))}
-        </nav>
-
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-6 py-5 text-sm text-white/75 hover:text-white border-t border-white/10"
-        >
-          <LogOut size={18} />
-          Logout
-        </button>
+    <div className="admin-theme min-h-screen flex bg-bg text-ink">
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:flex w-60 shrink-0 bg-sidebar text-white flex-col sticky top-0 h-screen">
+        <SidebarBody />
       </aside>
 
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setSidebarOpen(false)}
+            aria-hidden="true"
+          />
+          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-sidebar text-white flex flex-col">
+            <SidebarBody onNavigate={() => setSidebarOpen(false)} />
+          </aside>
+        </div>
+      )}
+
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="flex items-center gap-4 px-8 py-4 bg-surface border-b border-border relative z-20">
+        <header className="flex items-center gap-3 px-4 sm:px-6 lg:px-8 py-3.5 bg-surface border-b border-border sticky top-0 z-30">
+          <button
+            className="lg:hidden w-9 h-9 rounded-lg hover:bg-surface-soft flex items-center justify-center text-muted"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open navigation"
+          >
+            <Menu size={20} />
+          </button>
+
           <div className="flex-1 max-w-md relative">
             <Search
               size={16}
@@ -168,16 +212,16 @@ export default function AdminLayout({ title, eyebrow, actions, children }) {
                 <div className="absolute top-full left-0 right-0 mt-2 bg-surface border border-border rounded-xl shadow-lg overflow-hidden z-20">
                   {searchResults.length === 0 ? (
                     <p className="px-4 py-3 text-sm text-muted">
-                      No pages match "{searchQuery}"
+                      No pages match &quot;{searchQuery}&quot;
                     </p>
                   ) : (
-                    searchResults.map(({ to, label, icon: Icon }) => (
+                    searchResults.map(({ to, label, icon }) => (
                       <button
                         key={to}
                         onClick={() => goToPage(to)}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-ink hover:bg-surface-soft text-left"
                       >
-                        <Icon size={16} className="text-accent" />
+                        {createElement(icon, { size: 16, className: "text-accent" })}
                         {label}
                       </button>
                     ))
@@ -187,28 +231,28 @@ export default function AdminLayout({ title, eyebrow, actions, children }) {
             )}
           </div>
 
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => setIsDark((d) => !d)}
-              className="w-9 h-9 rounded-full bg-accent-soft flex items-center justify-center"
+              className="w-9 h-9 rounded-full bg-surface-soft hidden sm:flex items-center justify-center"
               aria-label="Toggle dark mode"
             >
               {isDark ? (
-                <Sun size={16} className="text-sidebar" />
+                <Sun size={16} className="text-muted" />
               ) : (
-                <Moon size={16} className="text-sidebar" />
+                <Moon size={16} className="text-muted" />
               )}
             </button>
 
             <div className="relative">
               <button
                 onClick={() => setNotifOpen((o) => !o)}
-                className="relative w-9 h-9 rounded-full bg-accent-soft flex items-center justify-center"
+                className="relative w-9 h-9 rounded-full bg-surface-soft flex items-center justify-center"
                 aria-label="Notifications"
               >
-                <Bell size={16} className="text-sidebar" />
+                <Bell size={16} className="text-muted" />
                 {notifications.length > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500" />
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
                 )}
               </button>
 
@@ -218,10 +262,10 @@ export default function AdminLayout({ title, eyebrow, actions, children }) {
                     className="fixed inset-0 z-10"
                     onClick={() => setNotifOpen(false)}
                   />
-                  <div className="absolute top-full right-0 mt-2 w-72 bg-surface border border-border rounded-xl shadow-lg z-20">
+                  <div className="absolute top-full right-0 mt-2 w-72 max-w-[80vw] bg-surface border border-border rounded-xl shadow-lg z-20">
                     <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                       <p className="font-medium text-ink text-sm">Notifications</p>
-                      <button onClick={() => setNotifOpen(false)}>
+                      <button onClick={() => setNotifOpen(false)} aria-label="Close notifications">
                         <X size={14} className="text-muted" />
                       </button>
                     </div>
@@ -234,17 +278,17 @@ export default function AdminLayout({ title, eyebrow, actions, children }) {
                           </p>
                         </div>
                       ) : (
-                        notifications.map(({ id, icon: Icon, tone, text }) => (
+                        notifications.map(({ id, icon, tone, text }) => (
                           <div
                             key={id}
                             className="flex items-start gap-3 px-4 py-3 border-b border-border last:border-b-0"
                           >
-                            <Icon
-                              size={16}
-                              className={
-                                tone === "warning" ? "text-accent mt-0.5" : "text-primary mt-0.5"
-                              }
-                            />
+                            {createElement(icon, {
+                              size: 16,
+                              className: tone === "warning"
+                                ? "text-accent dark:text-amber-400 mt-0.5"
+                                : "text-primary mt-0.5",
+                            })}
                             <p className="text-sm text-ink">{text}</p>
                           </div>
                         ))
@@ -259,11 +303,12 @@ export default function AdminLayout({ title, eyebrow, actions, children }) {
               <button
                 onClick={() => setProfileOpen((o) => !o)}
                 className="flex items-center gap-2.5"
+                aria-label="Account"
               >
                 <div className="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center text-sm font-semibold">
                   {admin.name?.charAt(0) || "A"}
                 </div>
-                <div className="leading-tight text-sm text-left">
+                <div className="leading-tight text-sm text-left hidden sm:block">
                   <p className="font-medium text-ink">{admin.name}</p>
                   <p className="text-muted text-xs">{admin.role}</p>
                 </div>
@@ -281,8 +326,13 @@ export default function AdminLayout({ title, eyebrow, actions, children }) {
                       <p className="text-muted text-xs">{admin.role}</p>
                     </div>
                     <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-red-600 hover:bg-red-50 text-left"
+                      onClick={() => {
+                        localStorage.removeItem("token");
+                        localStorage.removeItem("role");
+                        localStorage.removeItem("user");
+                        navigate("/admin/login", { replace: true });
+                      }}
+                      className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 text-left"
                     >
                       <LogOut size={16} />
                       Logout
@@ -294,18 +344,18 @@ export default function AdminLayout({ title, eyebrow, actions, children }) {
           </div>
         </header>
 
-        <main className="flex-1 px-8 py-8">
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 lg:py-8 w-full max-w-[1200px] mx-auto">
           {(eyebrow || title || actions) && (
-            <div className="flex items-start justify-between mb-6">
-              <div>
-                {eyebrow && <p className="text-accent font-medium mb-1">{eyebrow}</p>}
+            <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
+              <div className="min-w-0">
+                {eyebrow && <p className="text-accent dark:text-primary text-xs font-semibold uppercase tracking-wide mb-1">{eyebrow}</p>}
                 {title && (
-                  <h1 className="font-display text-4xl font-semibold text-ink">
+                  <h1 className="font-display text-2xl sm:text-3xl font-semibold text-ink">
                     {title}
                   </h1>
                 )}
               </div>
-              {actions && <div className="flex items-center gap-3">{actions}</div>}
+              {actions && <div className="flex items-center gap-3 flex-wrap w-full sm:w-auto">{actions}</div>}
             </div>
           )}
           {children}

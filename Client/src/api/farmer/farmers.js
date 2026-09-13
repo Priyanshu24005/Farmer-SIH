@@ -12,3 +12,6 @@ export const updateFarmer = (id, payload) =>
   api.put(`/farmers/${id}`, payload).then((res) => res.data);
 
 export const getMandis = () => api.get("/mandis").then((res) => res.data);
+
+export const getMandiById = (id) =>
+  api.get(`/mandis/${id}`).then((res) => res.data);

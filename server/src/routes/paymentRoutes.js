@@ -6,13 +6,14 @@ import {
   markPaymentPaid,
   getFarmerPayments
 } from '../controllers/paymentController.js';
+import { protect, requireAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/', createPayment);
+router.post('/', protect, requireAdmin, createPayment);
 router.get('/', getPayments);
 router.get('/:id', getPaymentById);
 router.get('/farmer/:farmerId', getFarmerPayments);
-router.put('/:id/pay', markPaymentPaid);
+router.put('/:id/pay', protect, requireAdmin, markPaymentPaid);
 
 export default router;

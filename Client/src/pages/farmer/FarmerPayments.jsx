@@ -1,4 +1,4 @@
-import { createElement, useEffect, useMemo, useState } from "react";
+import { createElement, useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   Banknote,
@@ -17,17 +17,15 @@ import { useNavigate } from "react-router-dom";
 import FarmerAuthHeader from "../../components/farmer/FarmerAuthHeader";
 import FarmerBottomNav from "../../components/farmer/FarmerBottomNav";
 import useFarmerPreferences from "../../components/farmer/useFarmerPreferences";
-import {
-  calculatePaymentSummary,
-  getMockPayments,
-} from "../../components/farmer/paymentData";
+import { getFarmerPayments } from "../../api/farmer/payments";
+import { getFarmerProfile } from "../../components/farmer/farmerSession";
 import "./farmerBase.css";
 import "./farmerPayments.css";
 
 const COPY = {
   en: {
     brandSubtitle: "Kisan Mandi Portal",
-    homeLabel: "Farmer-SIH home",
+    homeLabel: "KisanSetu home",
     backLabel: "Back",
     languageLabel: "Choose language",
     useDarkMode: "Use dark mode",
@@ -151,20 +149,13 @@ function PaymentCard({ payment, copy, language, onOpen }) {
           {createElement(StatusIcon, { size: 14, "aria-hidden": true })} {status.label}
         </span>
       </span>
-      <strong className="farmer-payments__crop">{payment.crop}</strong>
-      <span className="farmer-payments__mandi">{payment.mandi}</span>
-      <span className="farmer-payments__date"><CalendarDays size={14} /> {payment.date}</span>
+      <strong className="farmer-payments__crop">Token #{payment.tokenNumber ?? "—"}</strong>
+      <span className="farmer-payments__mandi">{payment.mandi || "Mandi not available"}</span>
+      <span className="farmer-payments__date"><CalendarDays size={14} /> {payment.date ? new Date(payment.date).toLocaleDateString(language === "hi" ? "hi-IN" : "en-IN") : "—"}</span>
 
       <span className="farmer-payments__card-divider" />
       <span className="farmer-payments__amount-row"><span>{copy.amount}</span><strong>{formatAmount(payment.amount)}</strong></span>
 
-      {payment.status === "paid" && (
-        <span className="farmer-payments__payment-meta">
-          <span><small>{copy.paymentDate}</small><b>{payment.paymentDate}</b></span>
-          <span><small>{copy.paymentMethod}</small><b>{language === "hi" ? payment.methodHindi : payment.method}</b></span>
-          <span><small>{copy.account}</small><b>{payment.account}</b></span>
-        </span>
-      )}
       {payment.status === "pending" && (
         <span className="farmer-payments__pending-message"><Clock3 size={15} /> {copy.pendingMessage}</span>
       )}
@@ -186,36 +177,56 @@ export default function FarmerPayments() {
   const copy = COPY[language] || COPY.en;
   const [payments, setPayments] = useState([]);
   const [filter, setFilter] = useState("all");
-  const [cropFilter, setCropFilter] = useState("all");
   const [state, setState] = useState("loading");
+  const farmerProfile = useMemo(() => getFarmerProfile(), []);
+  const farmerId = farmerProfile?.id || farmerProfile?._id;
 
-  const loadPayments = () => {
+  const loadPayments = useCallback(() => {
     setState("loading");
-    getMockPayments()
+    if (!farmerId) {
+      setPayments([]);
+      setState("ready");
+      return;
+    }
+    getFarmerPayments(farmerId)
       .then((data) => {
-        setPayments(data);
+        const records = Array.isArray(data) ? data : data?.payments || [];
+        setPayments(records.map((payment) => ({
+          id: payment._id,
+          tokenNumber: payment.token?.tokenNumber,
+          mandi: payment.token?.mandi?.name,
+          date: payment.createdAt,
+          amount: payment.amount,
+          quantityKg: payment.quantityKg,
+          qualityGrade: payment.qualityGrade,
+          status: payment.status,
+          paidAt: payment.paidAt,
+        })));
         setState("ready");
       })
       .catch(() => setState("error"));
-  };
+  }, [farmerId]);
 
   useEffect(() => {
     loadPayments();
-  }, []);
+  }, [loadPayments]);
 
-  const summary = useMemo(() => calculatePaymentSummary(payments), [payments]);
+  const summary = useMemo(() => payments.reduce((result, payment) => {
+    if (payment.status === "paid") result.totalPaid += payment.amount || 0;
+    if (payment.status === "pending") result.pending += payment.amount || 0;
+    result.totalRecords += 1;
+    return result;
+  }, { totalPaid: 0, pending: 0, totalRecords: 0 }), [payments]);
   const filteredPayments = useMemo(
     () => payments.filter((payment) => {
       const matchesStatus = filter === "all" || payment.status === filter;
-      const matchesCrop = cropFilter === "all" || payment.crop === cropFilter;
-      return matchesStatus && matchesCrop;
+      return matchesStatus;
     }),
-    [cropFilter, filter, payments]
+    [filter, payments]
   );
 
   const clearFilters = () => {
     setFilter("all");
-    setCropFilter("all");
   };
 
   return (
@@ -225,7 +236,7 @@ export default function FarmerPayments() {
       <main className="farmer-shell farmer-payments__main" id="farmer-payments-main">
         <header className="farmer-payments__heading">
           <div>
-            <p className="farmer-payments__eyebrow"><Wallet size={15} /> Farmer-SIH</p>
+            <p className="farmer-payments__eyebrow"><Wallet size={15} /> KisanSetu</p>
             <h1>{copy.title}</h1>
           </div>
           <span className="farmer-payments__heading-icon" aria-hidden="true"><Banknote size={23} /></span>
@@ -260,13 +271,6 @@ export default function FarmerPayments() {
                   );
                 })}
               </div>
-              <label className="farmer-payments__crop-filter">
-                <span>{copy.allCrops}</span>
-                <select value={cropFilter} onChange={(event) => setCropFilter(event.target.value)}>
-                  <option value="all">{copy.allCrops}</option>
-                  {Object.entries(copy.cropOptions).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-                </select>
-              </label>
             </>
           )}
 

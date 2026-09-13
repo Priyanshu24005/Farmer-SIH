@@ -1,20 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowRight, CalendarDays, ChevronRight, CircleAlert, Filter, RefreshCw, Sprout } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import FarmerAuthHeader from "../../components/farmer/FarmerAuthHeader";
 import FarmerBottomNav from "../../components/farmer/FarmerBottomNav";
 import useFarmerPreferences from "../../components/farmer/useFarmerPreferences";
-import {
-  getMockProcurementHistory,
-  PROCUREMENT_HISTORY_CROPS,
-} from "../../components/farmer/procurementHistoryData";
+import { getFarmerTokens } from "../../api/farmer/tokens";
+import { getFarmerProfile } from "../../components/farmer/farmerSession";
 import "./farmerBase.css";
 import "./farmerHistory.css";
 
 const COPY = {
   en: {
     brandSubtitle: "Kisan Mandi Portal",
-    homeLabel: "Farmer-SIH home",
+    homeLabel: "KisanSetu home",
     backLabel: "Back",
     languageLabel: "Choose language",
     useDarkMode: "Use dark mode",
@@ -84,10 +82,6 @@ const COPY = {
   },
 };
 
-function formatAmount(amount) {
-  return `₹${amount.toLocaleString("en-IN")}`;
-}
-
 function getDateFilterValue(index) {
   return ["all", "2026-08", "2026-07"][index] || "all";
 }
@@ -98,35 +92,43 @@ export default function FarmerHistory() {
   const copy = COPY[language] || COPY.en;
   const [records, setRecords] = useState([]);
   const [dateFilter, setDateFilter] = useState("all");
-  const [cropFilter, setCropFilter] = useState("all");
   const [state, setState] = useState("loading");
+  const farmerProfile = useMemo(() => getFarmerProfile(), []);
+  const farmerId = farmerProfile?.id || farmerProfile?._id;
 
-  const loadHistory = () => {
+  const loadHistory = useCallback(() => {
     setState("loading");
-    getMockProcurementHistory()
+    if (!farmerId) {
+      setRecords([]);
+      setState("ready");
+      return;
+    }
+    getFarmerTokens(farmerId)
       .then((data) => {
-        setRecords(data);
+        const tokens = Array.isArray(data) ? data : data?.tokens || [];
+        setRecords(tokens.map((token) => ({
+          id: token._id,
+          tokenNumber: token.tokenNumber,
+          date: token.date,
+          mandi: token.mandi,
+          status: token.status,
+        })));
         setState("ready");
       })
       .catch(() => setState("error"));
-  };
+  }, [farmerId]);
 
   useEffect(() => {
     loadHistory();
-  }, []);
+  }, [loadHistory]);
 
   const filteredRecords = useMemo(
-    () => records.filter((record) => {
-      const matchesDate = dateFilter === "all" || record.dateValue.startsWith(dateFilter);
-      const matchesCrop = cropFilter === "all" || record.crop === cropFilter;
-      return matchesDate && matchesCrop;
-    }),
-    [cropFilter, dateFilter, records]
+    () => records.filter((record) => dateFilter === "all" || String(record.date || "").startsWith(dateFilter)),
+    [dateFilter, records]
   );
 
   const clearFilters = () => {
     setDateFilter("all");
-    setCropFilter("all");
   };
 
   return (
@@ -143,7 +145,7 @@ export default function FarmerHistory() {
       <main className="farmer-shell farmer-history__main" id="farmer-history-main">
         <header className="farmer-history__heading">
           <div>
-            <p className="farmer-history__eyebrow"><Sprout size={15} aria-hidden="true" /> Farmer-SIH</p>
+            <p className="farmer-history__eyebrow"><Sprout size={15} aria-hidden="true" /> KisanSetu</p>
             <h1>{copy.title}</h1>
             <p>{copy.subtitle}</p>
           </div>
@@ -156,13 +158,6 @@ export default function FarmerHistory() {
             <span>{copy.allDates}</span>
             <select value={dateFilter} onChange={(event) => setDateFilter(event.target.value)}>
               {copy.dateOptions.map((label, index) => <option key={label} value={getDateFilterValue(index)}>{label}</option>)}
-            </select>
-          </label>
-          <label>
-            <span>{copy.allCrops}</span>
-            <select value={cropFilter} onChange={(event) => setCropFilter(event.target.value)}>
-              <option value="all">{copy.allCrops}</option>
-              {PROCUREMENT_HISTORY_CROPS.map((crop) => <option key={crop} value={crop}>{copy.cropOptions[crop]}</option>)}
             </select>
           </label>
         </section>
@@ -205,12 +200,12 @@ export default function FarmerHistory() {
             {filteredRecords.map((record) => (
               <button type="button" className="farmer-history__card" key={record.id} onClick={() => navigate(`/farmer/procurement/${record.id}`)}>
                 <span className="farmer-history__card-top"><span>{record.date}</span><ChevronRight size={19} aria-hidden="true" /></span>
-                <strong className="farmer-history__mandi">{record.mandi}</strong>
-                <span className="farmer-history__crop"><Sprout size={15} aria-hidden="true" /> {record.crop}</span>
+                <strong className="farmer-history__mandi">{record.mandi?.name || "Mandi not available"}</strong>
+                <span className="farmer-history__crop"><Sprout size={15} aria-hidden="true" /> Token #{record.tokenNumber ?? "—"}</span>
                 <span className="farmer-history__card-details">
-                  <span><small>{copy.quantity}</small><b>{record.quantity}</b></span>
-                  <span><small>{copy.amount}</small><b>{formatAmount(record.amount)}</b></span>
-                  <span className={`farmer-history__status farmer-history__status--${record.status}`}><small>{record.status === "completed" ? copy.statusCompleted : copy.statusPending}</small></span>
+                  <span><small>{copy.statusCompleted}</small><b>{record.status || "—"}</b></span>
+                  <span><small>{copy.allDates}</small><b>{record.date ? new Date(record.date).toLocaleDateString(language === "hi" ? "hi-IN" : "en-IN") : "—"}</b></span>
+                  <span className={`farmer-history__status farmer-history__status--${record.status}`}><small>{record.status || "—"}</small></span>
                 </span>
                 <span className="farmer-history__details-link">{language === "hi" ? "विवरण देखें" : "View details"} <ArrowRight size={15} aria-hidden="true" /></span>
               </button>

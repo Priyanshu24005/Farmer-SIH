@@ -24,7 +24,7 @@ export default function FarmerAuthHeader({
               <Sprout size={21} strokeWidth={2.35} />
             </span>
             <span>
-              <strong>Farmer-SIH</strong>
+              <strong>KisanSetu</strong>
               <span className="farmer-brand__subtitle">{copy.brandSubtitle}</span>
             </span>
           </span>

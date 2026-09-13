@@ -8,6 +8,7 @@ import {
   updateMandi,
   deleteMandi,
 } from "../../api/admin/mandi";
+import { LoadingRows, TableScroll } from "../../components/admin/ui";
 
 const EMPTY_FORM = { name: "", location: "", dailyCapacity: "" };
 
@@ -33,6 +34,7 @@ export default function MandiManagement() {
       const data = await getMandis();
       setMandis(Array.isArray(data) ? data : data.mandis || []);
     } catch {
+      // Keep the existing empty mandi state when loading fails.
     } finally {
       setLoading(false);
     }
@@ -97,6 +99,7 @@ export default function MandiManagement() {
       }
       setModalOpen(false);
     } catch {
+      // Keep the existing form state when saving fails.
     } finally {
       setSaving(false);
     }
@@ -109,6 +112,7 @@ export default function MandiManagement() {
       setMandis((prev) => prev.filter((m) => m._id !== deleteTarget._id));
       toast.success("Mandi deleted");
     } catch {
+      // Keep the existing list state when deletion fails.
     } finally {
       setDeleteTarget(null);
     }
@@ -144,11 +148,7 @@ export default function MandiManagement() {
         </div>
 
         {loading ? (
-          <div className="p-8 space-y-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-14 rounded-xl bg-surface-soft animate-pulse" />
-            ))}
-          </div>
+          <LoadingRows count={3} />
         ) : filteredMandis.length === 0 ? (
           <div className="p-12 flex flex-col items-center text-center">
             <div className="w-12 h-12 rounded-full bg-accent-soft flex items-center justify-center mb-3">
@@ -164,7 +164,8 @@ export default function MandiManagement() {
             </p>
           </div>
         ) : (
-          <table className="w-full text-sm">
+          <TableScroll>
+          <table className="w-full text-sm min-w-[640px]">
             <thead>
               <tr className="text-left text-muted bg-surface-soft">
                 <th className="font-medium px-6 py-3">Mandi</th>
@@ -194,7 +195,7 @@ export default function MandiManagement() {
                       </button>
                       <button
                         onClick={() => setDeleteTarget(mandi)}
-                        className="p-2 rounded-lg hover:bg-red-50 text-muted hover:text-red-600"
+                        className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 text-muted hover:text-red-600 dark:hover:text-red-400"
                         aria-label={`Delete ${mandi.name}`}
                       >
                         <Trash2 size={16} />
@@ -205,6 +206,7 @@ export default function MandiManagement() {
               ))}
             </tbody>
           </table>
+          </TableScroll>
         )}
       </div>
 
@@ -287,8 +289,8 @@ export default function MandiManagement() {
       {deleteTarget && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
           <div className="bg-surface rounded-2xl w-full max-w-sm p-6 text-center">
-            <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
-              <Trash2 size={20} className="text-red-500" />
+            <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+              <Trash2 size={20} className="text-red-500 dark:text-red-400" />
             </div>
             <h2 className="font-display font-semibold text-ink mb-1">
               Delete mandi?

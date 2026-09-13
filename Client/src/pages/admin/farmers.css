@@ -1,0 +1,41 @@
+.farmers-page { min-width: 0; }
+.farmers-intro { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: -14px 0 22px; }
+.farmers-intro p { margin: 0; font-size: .9rem; }
+.farmers-summary { display: flex; gap: 8px; flex-wrap: wrap; color: var(--color-muted); font-size: .75rem; }
+.farmers-summary span { padding: 7px 10px; border: 1px solid var(--color-border); border-radius: 999px; background: var(--color-surface); }
+.farmers-summary strong { color: var(--color-ink); margin-right: 3px; }
+.farmers-panel { overflow: hidden; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); box-shadow: 0 10px 30px rgba(30, 20, 10, .04); }
+.farmers-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 17px 20px; border-bottom: 1px solid var(--color-border); }
+.farmers-search { display: flex; align-items: center; gap: 10px; width: min(100%, 390px); min-height: 42px; padding: 0 12px; border: 1px solid var(--color-border); border-radius: 10px; color: var(--color-muted); background: var(--color-surface-soft); transition: border-color 150ms ease, box-shadow 150ms ease; }
+.farmers-search:focus-within { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgb(var(--color-primary-rgb) / .12); }
+.farmers-search input { min-width: 0; flex: 1; border: 0; outline: 0; color: var(--color-ink); background: transparent; font: inherit; font-size: .84rem; }
+.farmers-search input::placeholder { color: var(--color-muted); }
+.farmers-search button { display: grid; place-items: center; padding: 3px; border: 0; color: var(--color-muted); background: transparent; cursor: pointer; }
+.farmers-toolbar-note { display: inline-flex; align-items: center; gap: 7px; color: var(--color-muted); font-size: .76rem; }
+.farmers-loading { padding: 20px; }
+.farmers-state { display: flex; min-height: 245px; align-items: center; justify-content: center; flex-direction: column; padding: 32px 20px; text-align: center; }
+.farmers-state-icon { display: grid; width: 48px; height: 48px; place-items: center; margin-bottom: 13px; border-radius: 50%; color: var(--color-primary); background: rgb(var(--color-primary-rgb) / .1); }
+.farmers-state-icon.is-error { color: #a33a32; background: #fbe4df; }
+.farmers-state p { margin: 0; color: var(--color-ink); font-family: 'Segoe UI', sans-serif; font-size: 1rem; font-weight: 650; }
+.farmers-state span { margin-top: 5px; color: var(--color-muted); font-size: .8rem; }
+.farmers-state button { display: inline-flex; align-items: center; gap: 7px; margin-top: 17px; padding: 9px 13px; border: 1px solid var(--color-border); border-radius: 9px; color: var(--color-primary); background: var(--color-surface); font-size: .8rem; font-weight: 650; cursor: pointer; }
+.farmers-state button:hover, .farmers-state button:focus-visible { background: var(--color-surface-soft); }
+.farmers-table { width: 100%; border-collapse: collapse; text-align: left; font-size: .82rem; }
+.farmers-table th { padding: 13px 20px; color: var(--color-muted); background: var(--color-surface-soft); font-size: .7rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.farmers-table td { padding: 15px 20px; border-top: 1px solid var(--color-border); color: var(--color-muted); }
+.farmers-table tbody tr { outline: 0; cursor: pointer; transition: background 140ms ease; }
+.farmers-table tbody tr:hover, .farmers-table tbody tr:focus-visible { background: rgb(var(--color-primary-rgb) / .045); }
+.farmer-name { display: flex; align-items: center; gap: 10px; color: var(--color-ink); }
+.farmer-name > span, .farmer-avatar { display: grid; width: 32px; height: 32px; flex: 0 0 auto; place-items: center; border-radius: 10px; color: var(--color-primary); background: rgb(var(--color-primary-rgb) / .1); font-size: .8rem; font-weight: 700; }
+.farmer-name strong { font-weight: 650; }
+.farmers-mobile-list { display: none; }
+.farmer-card { width: 100%; padding: 16px; border: 0; border-bottom: 1px solid var(--color-border); color: inherit; background: transparent; text-align: left; cursor: pointer; }
+.farmer-card:hover, .farmer-card:focus-visible { background: rgb(var(--color-primary-rgb) / .045); outline: 0; }
+.farmer-card-top, .farmer-card-details { display: flex; align-items: center; gap: 10px; }
+.farmer-card-top > span:nth-child(2) { display: grid; min-width: 0; flex: 1; gap: 3px; }
+.farmer-card strong { overflow: hidden; color: var(--color-ink); font-size: .86rem; text-overflow: ellipsis; white-space: nowrap; }
+.farmer-card small { color: var(--color-muted); font-size: .73rem; }
+.farmer-card-details { flex-wrap: wrap; margin: 14px 0 0 42px; color: var(--color-muted); font-size: .74rem; }
+.farmer-card-details span { display: inline-flex; align-items: center; gap: 5px; }
+@media (max-width: 639px) { .farmers-intro { align-items: flex-start; flex-direction: column; margin-top: -12px; } .farmers-toolbar { align-items: stretch; flex-direction: column; padding: 14px; } .farmers-search { width: 100%; } .farmers-toolbar-note { font-size: .72rem; } .farmers-table { display: none; } .farmers-mobile-list { display: block; } }
+@media (min-width: 640px) { .farmers-table th:last-child, .farmers-table td:last-child { width: 130px; } }

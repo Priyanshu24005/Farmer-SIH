@@ -1,4 +1,4 @@
-import { createElement, useMemo } from "react";
+import { createElement, useEffect, useState } from "react";
 import {
   ArrowRight,
   BadgeCheck,
@@ -12,23 +12,23 @@ import {
   PackageCheck,
   Receipt,
   Sprout,
+  Loader2,
   Wheat,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import FarmerAuthHeader from "../../components/farmer/FarmerAuthHeader";
 import FarmerBottomNav from "../../components/farmer/FarmerBottomNav";
 import useFarmerPreferences from "../../components/farmer/useFarmerPreferences";
-import {
-  getMockProcurementDetails,
-  PROCUREMENT_DETAIL_STATUSES,
-} from "../../components/farmer/procurementDetailsData";
+import { getTokenById } from "../../api/farmer/tokens";
+import { getFarmerPayments } from "../../api/farmer/payments";
+import { getFarmerProfile } from "../../components/farmer/farmerSession";
 import "./farmerBase.css";
 import "./farmerProcurementDetails.css";
 
 const COPY = {
   en: {
     brandSubtitle: "Kisan Mandi Portal",
-    homeLabel: "Farmer-SIH home",
+    homeLabel: "KisanSetu home",
     backLabel: "Back",
     languageLabel: "Choose language",
     useDarkMode: "Use dark mode",
@@ -44,6 +44,7 @@ const COPY = {
     verifiedNote: "Weighment and quality inspection verified by Meerut Mandi in-charge.",
     completedBadge: "Completed",
     govtMsp: "Govt MSP Assured",
+    notAvailable: "Not available from backend",
     token: "Token",
     date: "Date",
     crop: "Crop",
@@ -102,6 +103,7 @@ const COPY = {
     verifiedNote: "मेरठ मंडी प्रभारी ने वजन और गुणवत्ता जांच की पुष्टि की है।",
     completedBadge: "पूर्ण",
     govtMsp: "सरकारी एमएसपी सुनिश्चित",
+    notAvailable: "बैकएंड से उपलब्ध नहीं",
     token: "टोकन",
     date: "तारीख",
     crop: "फसल",
@@ -149,6 +151,7 @@ const STATUS_LABEL_KEYS = {
   pending: "pending",
   cancelled: "cancelled",
 };
+const PROCUREMENT_DETAIL_STATUSES = ["completed", "pending", "cancelled"];
 
 function DetailRow({ icon: Icon, label, value, extra }) {
   return (
@@ -176,7 +179,48 @@ export default function FarmerProcurementDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const copy = COPY[language] || COPY.en;
-  const record = useMemo(() => getMockProcurementDetails(id), [id]);
+  const [record, setRecord] = useState(null);
+  const [state, setState] = useState("loading");
+  const farmerProfile = getFarmerProfile() || {};
+  const farmerId = farmerProfile.id || farmerProfile._id;
+
+  useEffect(() => {
+    let active = true;
+    if (!id || !farmerId) {
+      setState("error");
+      return () => { active = false; };
+    }
+    Promise.all([getTokenById(id), getFarmerPayments(farmerId)])
+      .then(([token, payments]) => {
+        if (!active) return;
+        const paymentList = Array.isArray(payments) ? payments : payments?.payments || [];
+        const payment = paymentList.find((item) => item.token?._id === token._id || item.token?._id?.toString() === token._id?.toString());
+        const status = token.status === "cancelled" ? "cancelled" : payment ? "completed" : "pending";
+        setRecord({
+          status,
+          tokenNumber: token.tokenNumber,
+          date: token.date ? new Date(token.date).toLocaleDateString(language === "hi" ? "hi-IN" : "en-IN") : null,
+          mandi: token.mandi?.name,
+          location: token.mandi?.location,
+          crop: null,
+          quantityKg: payment?.quantityKg != null ? `${payment.quantityKg} kg` : null,
+          amount: payment?.amount != null ? `₹${payment.amount.toLocaleString("en-IN")}` : null,
+          grade: payment?.qualityGrade ? `Grade ${payment.qualityGrade}` : null,
+          paymentDate: payment?.paidAt ? new Date(payment.paidAt).toLocaleDateString(language === "hi" ? "hi-IN" : "en-IN") : null,
+          paymentMethod: null,
+          account: null,
+          acceptedQuantity: null,
+          mandiAddress: null,
+        });
+        setState("ready");
+      })
+      .catch(() => active && setState("error"));
+    return () => { active = false; };
+  }, [farmerId, id, language]);
+
+  if (state === "loading") {
+    return <div className={`farmer-welcome farmer-welcome--${theme} farmer-procurement-details`} lang={language === "hi" ? "hi" : "en"}><FarmerAuthHeader copy={copy} language={language} onLanguageChange={setLanguage} theme={theme} onThemeToggle={toggleTheme} backTo="/farmer/history" /><main className="farmer-shell farmer-procurement-details__not-found"><Loader2 size={28} className="farmer-spin" /><h1>Loading procurement details...</h1></main></div>;
+  }
 
   const statusLabels = {
     completed: copy.completed,
@@ -211,7 +255,7 @@ export default function FarmerProcurementDetails() {
       <main className="farmer-shell farmer-procurement-details__main" id="farmer-procurement-details-main">
         <header className="farmer-procurement-details__heading">
           <div>
-            <p className="farmer-procurement-details__eyebrow"><Receipt size={15} aria-hidden="true" /> Farmer-SIH</p>
+            <p className="farmer-procurement-details__eyebrow"><Receipt size={15} aria-hidden="true" /> KisanSetu</p>
             <h1>{copy.title}</h1>
           </div>
           <span className="farmer-procurement-details__heading-icon" aria-hidden="true"><FileCheck2 size={23} /></span>
@@ -233,7 +277,7 @@ export default function FarmerProcurementDetails() {
           <span className="farmer-procurement-details__complete-icon" aria-hidden="true"><Check size={21} /></span>
           <div>
             <h2>{statusTitle}</h2>
-            <p>{record.status === "completed" ? (language === "hi" ? copy.verifiedNote : record.verificationNote) : copy.verifiedNote}</p>
+            <p>{copy.notAvailable}</p>
           </div>
           <span className="farmer-procurement-details__badge">{statusLabels[record.status]}</span>
         </section>
@@ -244,15 +288,15 @@ export default function FarmerProcurementDetails() {
               <p>{copy.token}</p>
               <strong id="farmer-procurement-summary-title">#{record.tokenNumber}</strong>
             </div>
-            <span className="farmer-procurement-details__trust"><BadgeCheck size={16} /> {copy.govtMsp}</span>
+            <span className="farmer-procurement-details__trust"><BadgeCheck size={16} /> {copy.notAvailable}</span>
           </div>
-          <div className="farmer-procurement-details__summary-date"><CalendarDays size={16} /> <span>{copy.date}: <strong>{record.date}</strong></span></div>
+          <div className="farmer-procurement-details__summary-date"><CalendarDays size={16} /> <span>{copy.date}: <strong>{record.date || copy.notAvailable}</strong></span></div>
           <div className="farmer-procurement-details__metrics">
-            <Metric label={copy.crop} value={record.crop} secondary={record.cropHindi} icon={Wheat} />
-            <Metric label={copy.quantity} value={record.quantityKg} secondary={record.quantityQuintals} icon={PackageCheck} />
-            <Metric label={copy.amount} value={record.amount} secondary={record.rate} icon={Banknote} />
+            <Metric label={copy.crop} value={record.crop || copy.notAvailable} secondary={copy.notAvailable} icon={Wheat} />
+            <Metric label={copy.quantity} value={record.quantityKg || copy.notAvailable} secondary={copy.notAvailable} icon={PackageCheck} />
+            <Metric label={copy.amount} value={record.amount || copy.notAvailable} secondary={copy.notAvailable} icon={Banknote} />
           </div>
-          <div className="farmer-procurement-details__grade"><span>{copy.grade}</span><strong>{record.grade}</strong></div>
+          <div className="farmer-procurement-details__grade"><span>{copy.grade}</span><strong>{record.grade || copy.notAvailable}</strong></div>
         </section>
 
         <section className="farmer-procurement-details__receipt" aria-label={copy.receiptAvailable}>
@@ -264,22 +308,22 @@ export default function FarmerProcurementDetails() {
         <div className="farmer-procurement-details__columns">
           <section className="farmer-procurement-details__card" aria-labelledby="procurement-details-card-title">
             <h2 id="procurement-details-card-title"><FileCheck2 size={18} /> {copy.details}</h2>
-            <DetailRow icon={CalendarDays} label={copy.procurementDate} value={record.date} />
-            <DetailRow icon={MapPin} label={copy.mandiCentre} value={record.mandi} />
-            <DetailRow icon={MapPin} label={copy.location} value={record.location} />
-            <DetailRow icon={Wheat} label={copy.cropName} value={`${record.crop} (${record.cropHindi})`} />
-            <DetailRow icon={PackageCheck} label={copy.acceptedQuantity} value={record.acceptedQuantity} />
-            <DetailRow icon={Receipt} label={copy.tokenNumber} value={`#${record.tokenNumber}`} />
-            <DetailRow icon={BadgeCheck} label={copy.qualityGrade} value={record.grade.split(" (")[0]} extra={copy.passed} />
+            <DetailRow icon={CalendarDays} label={copy.procurementDate} value={record.date || copy.notAvailable} />
+            <DetailRow icon={MapPin} label={copy.mandiCentre} value={record.mandi || copy.notAvailable} />
+            <DetailRow icon={MapPin} label={copy.location} value={record.location || copy.notAvailable} />
+            <DetailRow icon={Wheat} label={copy.cropName} value={copy.notAvailable} />
+            <DetailRow icon={PackageCheck} label={copy.acceptedQuantity} value={record.acceptedQuantity || copy.notAvailable} />
+            <DetailRow icon={Receipt} label={copy.tokenNumber} value={record.tokenNumber != null ? `#${record.tokenNumber}` : copy.notAvailable} />
+            <DetailRow icon={BadgeCheck} label={copy.qualityGrade} value={record.grade || copy.notAvailable} />
             <DetailRow icon={Check} label={copy.procurementStatus} value={statusLabels[record.status]} />
           </section>
 
           <section className="farmer-procurement-details__card farmer-procurement-details__payment" aria-labelledby="payment-status-title">
-            <div className="farmer-procurement-details__card-title-row"><h2 id="payment-status-title"><Banknote size={18} /> {copy.paymentStatus}</h2><span><Check size={13} /> {copy.paid}</span></div>
-            <div className="farmer-procurement-details__payment-amount">{record.amount}</div>
-            <DetailRow icon={CalendarDays} label={copy.paymentDate} value={record.paymentDate} />
-            <DetailRow icon={Banknote} label={copy.paymentMethod} value={record.paymentMethod} />
-            <DetailRow icon={Banknote} label={copy.account} value={record.account} />
+            <div className="farmer-procurement-details__card-title-row"><h2 id="payment-status-title"><Banknote size={18} /> {copy.paymentStatus}</h2><span><Check size={13} /> {record.status === "completed" ? copy.paid : statusLabels[record.status]}</span></div>
+            <div className="farmer-procurement-details__payment-amount">{record.amount || copy.notAvailable}</div>
+            <DetailRow icon={CalendarDays} label={copy.paymentDate} value={record.paymentDate || copy.notAvailable} />
+            <DetailRow icon={Banknote} label={copy.paymentMethod} value={record.paymentMethod || copy.notAvailable} />
+            <DetailRow icon={Banknote} label={copy.account} value={record.account || copy.notAvailable} />
             <button type="button" className="farmer-procurement-details__outline-button" onClick={() => navigate("/farmer/payments")}>
               {copy.viewPayment} <ArrowRight size={16} />
             </button>
@@ -288,8 +332,8 @@ export default function FarmerProcurementDetails() {
 
         <section className="farmer-procurement-details__card farmer-procurement-details__mandi" aria-labelledby="mandi-location-title">
           <div className="farmer-procurement-details__card-title-row"><h2 id="mandi-location-title"><MapPin size={18} /> {copy.mandiLocation}</h2><span className="farmer-procurement-details__location-status"><span /> {copy.locationStatus}</span></div>
-          <strong>{record.mandi}</strong>
-          <p>{record.mandiAddress}</p>
+          <strong>{record.mandi || copy.notAvailable}</strong>
+          <p>{record.mandiAddress || copy.notAvailable}</p>
           <button type="button" className="farmer-procurement-details__outline-button" onClick={() => undefined}>{copy.viewLocation} <ChevronRight size={16} /></button>
         </section>
       </main>

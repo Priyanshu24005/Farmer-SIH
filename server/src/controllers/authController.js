@@ -9,7 +9,7 @@ const generateToken = (id, role) => {
 // Register (works for both farmer and admin)
 export const registerFarmer = async (req, res) => {
   try {
-    const { name, mobile, aadhaar, password, cropType, role } = req.body;
+    const { name, mobile, aadhaar, password, cropType } = req.body;
 
     if (!name || !mobile || !password) {
       return res
@@ -26,7 +26,7 @@ export const registerFarmer = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const finalRole = role === "admin" ? "admin" : "farmer";
+    const finalRole = "farmer";
 
     const farmer = await Farmer.create({
       name,

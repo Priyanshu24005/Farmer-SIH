@@ -14,7 +14,7 @@ export default function FarmerWelcomeHeader({
           </span>
           <span className="farmer-brand__text">
             <span className="farmer-brand__titlerow">
-              <strong>Farmer-SIH</strong>
+              <strong>KisanSetu</strong>
               <span className="farmer-setu-badge" aria-label={copy.setuLabel}>SETU</span>
             </span>
             <span className="farmer-brand__subtitle">{copy.brandSubtitle}</span>

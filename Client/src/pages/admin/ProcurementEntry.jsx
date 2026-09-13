@@ -28,6 +28,7 @@ export default function ProcurementEntry() {
         setMandis(list);
         if (list.length) setSelectedMandi(list[0]._id);
       } catch {
+        // Keep the existing empty mandi state when loading fails.
       } finally {
         setLoadingMandis(false);
       }
@@ -47,6 +48,7 @@ export default function ProcurementEntry() {
       const data = await getQueue(selectedMandi);
       setQueue(Array.isArray(data) ? data : data.queue || []);
     } catch {
+      // Keep the existing queue state when loading fails.
     } finally {
       setLoadingQueue(false);
     }
@@ -85,6 +87,7 @@ export default function ProcurementEntry() {
       setQuantityKg("");
       setQualityGrade("");
     } catch {
+      // Keep the existing form state when submission fails.
     } finally {
       setSubmitting(false);
     }

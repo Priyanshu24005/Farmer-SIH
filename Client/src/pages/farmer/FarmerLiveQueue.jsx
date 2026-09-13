@@ -24,23 +24,10 @@ import "./farmerBase.css";
 import "./farmerHome.css";
 import "./farmerQueue.css";
 
-// Fallback mock queue data (matches approved Figma specs)
-const FALLBACK_QUEUE = {
-  tokenNumber: "A104",
-  status: "waiting", // "waiting" | "almost" | "turn" | "served" | "cancelled"
-  tokensAhead: 12,
-  estimatedWaitMinutes: 35,
-  currentServingToken: "A092",
-  mandiName: "Meerut Procurement Centre",
-  mandiLocation: "Meerut, Uttar Pradesh",
-  distanceKm: 4.2,
-  crop: "Wheat",
-};
-
 const COPY = {
   en: {
     brandSubtitle: "Kisan Mandi Portal",
-    homeLabel: "Farmer-SIH home",
+    homeLabel: "KisanSetu home",
     backLabel: "Back",
     languageLabel: "Choose language",
     useDarkMode: "Use dark mode",
@@ -74,6 +61,8 @@ const COPY = {
     loadingQueue: "Loading your live queue...",
     errorTitle: "Couldn't load the queue",
     errorSubtitle: "Please check your network and try again.",
+    missingSession: "Your farmer session is missing. Please log in again.",
+    missingMandi: "The active token does not have a valid mandi.",
     retryBtn: "Retry",
     navLabel: "Farmer navigation",
     navHome: "Home",
@@ -118,6 +107,8 @@ const COPY = {
     loadingQueue: "लाइव कतार लोड हो रही है...",
     errorTitle: "कतार लोड नहीं हो सकी",
     errorSubtitle: "कृपया नेटवर्क जांचें और पुनः प्रयास करें।",
+    missingSession: "आपका किसान सत्र उपलब्ध नहीं है। कृपया फिर से लॉगिन करें।",
+    missingMandi: "सक्रिय टोकन में मान्य मंडी उपलब्ध नहीं है।",
     retryBtn: "पुनः प्रयास करें",
     navLabel: "किसान नेविगेशन",
     navHome: "होम",
@@ -136,74 +127,79 @@ export default function FarmerLiveQueue() {
   const [queueData, setQueueData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [lastUpdated, setLastUpdated] = useState(() => new Date());
   const [showLocationToast, setShowLocationToast] = useState(false);
 
   const farmerProfile = useMemo(() => getFarmerProfile(), []);
 
-  // Fetch queue status from backend API or gracefully fall back to mock
+  // Fetch queue status from the authenticated Farmer and selected mandi APIs.
   const fetchQueue = useCallback(async (isManualRefresh = false) => {
     if (isManualRefresh) setRefreshing(true);
-    setError(false);
+    setErrorMessage("");
 
     const farmerId = farmerProfile?._id || farmerProfile?.id;
 
-    let resolvedData = null;
+    if (!farmerId || !/^[0-9a-fA-F]{24}$/.test(farmerId)) {
+      setQueueData(null);
+      setErrorMessage(copy.missingSession);
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
 
-    if (farmerId && /^[0-9a-fA-F]{24}$/.test(farmerId)) {
-      try {
-        const tokens = await getFarmerTokens(farmerId);
-        const activeToken = Array.isArray(tokens)
-          ? tokens.find((t) => t.status === "waiting")
-          : null;
+    try {
+      const tokens = await getFarmerTokens(farmerId);
+      const farmerTokens = Array.isArray(tokens) ? tokens : tokens?.tokens || [];
+      const activeToken = farmerTokens.find((token) => token.status === "waiting");
 
-        if (activeToken) {
-          let aheadCount = 0;
-          let currentServing = "A001";
-
-          if (activeToken.mandi?._id) {
-            try {
-              const queueList = await getMandiQueue(activeToken.mandi._id);
-              if (Array.isArray(queueList)) {
-                const myIndex = queueList.findIndex((item) => item._id === activeToken._id);
-                aheadCount = myIndex >= 0 ? myIndex : 0;
-                if (queueList[0]?.tokenNumber) {
-                  currentServing = `A${String(queueList[0].tokenNumber).padStart(3, "0")}`;
-                }
-              }
-            } catch (qErr) {
-              console.warn("[FarmerLiveQueue] Queue API error:", qErr.message);
-            }
-          }
-
-          resolvedData = {
-            tokenNumber: `A${String(activeToken.tokenNumber).padStart(3, "0")}`,
-            status: activeToken.status || "waiting",
-            tokensAhead: aheadCount,
-            estimatedWaitMinutes: Math.max(aheadCount * 3, 5),
-            currentServingToken: currentServing,
-            mandiName: activeToken.mandi?.name || FALLBACK_QUEUE.mandiName,
-            mandiLocation: activeToken.mandi?.location || FALLBACK_QUEUE.mandiLocation,
-            distanceKm: FALLBACK_QUEUE.distanceKm,
-            crop: activeToken.farmer?.cropType || FALLBACK_QUEUE.crop,
-          };
-        }
-      } catch (err) {
-        console.warn("[FarmerLiveQueue] Real API unavailable, using fallback:", err.message);
+      if (!activeToken) {
+        setQueueData(null);
+        setLastUpdated(new Date());
+        setLoading(false);
+        setRefreshing(false);
+        return;
       }
-    }
 
-    // If no real token found (dev mode, offline, or mock session), use FALLBACK_QUEUE
-    if (!resolvedData) {
-      resolvedData = FALLBACK_QUEUE;
-    }
+      const mandiId = typeof activeToken.mandi === "string"
+        ? activeToken.mandi
+        : activeToken.mandi?._id || activeToken.mandi?.id;
 
-    setQueueData(resolvedData);
-    setLastUpdated(new Date());
-    setLoading(false);
-    setRefreshing(false);
-  }, [farmerProfile]);
+      if (!mandiId || !/^[0-9a-fA-F]{24}$/.test(mandiId)) {
+        setQueueData(null);
+        setErrorMessage(copy.missingMandi);
+        return;
+      }
+
+      const queueList = await getMandiQueue(mandiId);
+      const queue = Array.isArray(queueList) ? queueList : queueList?.queue || [];
+      const aheadCount = activeToken.status === "waiting"
+        ? queue.filter((token) => Number(token.tokenNumber) < Number(activeToken.tokenNumber)).length
+        : 0;
+
+      setQueueData({
+        tokenNumber: `A${String(activeToken.tokenNumber).padStart(3, "0")}`,
+        status: activeToken.status || "waiting",
+        tokensAhead: aheadCount,
+        estimatedWaitMinutes: aheadCount * 3,
+        currentServingToken: queue[0]?.tokenNumber ? `A${String(queue[0].tokenNumber).padStart(3, "0")}` : "—",
+        mandiName: activeToken.mandi?.name || "—",
+        mandiLocation: activeToken.mandi?.location || "—",
+        date: activeToken.date,
+      });
+      setLastUpdated(new Date());
+    } catch (error) {
+      setQueueData(null);
+      const status = error?.response?.status;
+      const serverMessage = error?.response?.data?.message;
+      const reason = serverMessage || (status ? `Request failed (${status}).` : "Unable to reach the queue service.");
+      console.error("[FarmerLiveQueue] Queue load failed", { farmerId, status, message: serverMessage || error?.message });
+      setErrorMessage(reason);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [copy, farmerProfile]);
 
   useEffect(() => {
     fetchQueue();
@@ -272,14 +268,14 @@ export default function FarmerLiveQueue() {
             </div>
             <h2>{copy.loadingQueue}</h2>
           </div>
-        ) : error ? (
+        ) : errorMessage ? (
           /* ERROR STATE */
           <div className="farmer-queue__empty">
             <div className="farmer-queue__empty-icon" style={{ background: "#fee2e2", color: "#991b1b" }}>
               <AlertCircle size={28} />
             </div>
             <h2>{copy.errorTitle}</h2>
-            <p>{copy.errorSubtitle}</p>
+            <p>{errorMessage || copy.errorSubtitle}</p>
             <button
               type="button"
               className="farmer-primary-cta"
@@ -395,7 +391,10 @@ export default function FarmerLiveQueue() {
                   <h3>{queueData.mandiName}</h3>
                   <p>
                     <MapPin size={15} />
-                    <span>{queueData.mandiLocation} · {queueData.distanceKm} km</span>
+                      <span>{queueData.mandiLocation}</span>
+                    </p>
+                    <p>
+                      <span>{queueData.date ? new Date(queueData.date).toLocaleDateString(language === "hi" ? "hi-IN" : "en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}</span>
                   </p>
                 </div>
               </div>

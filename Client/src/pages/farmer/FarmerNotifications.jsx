@@ -23,7 +23,7 @@ import "./farmerNotifications.css";
 const COPY = {
   en: {
     brandSubtitle: "Kisan Mandi Portal",
-    homeLabel: "Farmer-SIH home",
+    homeLabel: "KisanSetu home",
     backLabel: "Back",
     languageLabel: "Choose language",
     useDarkMode: "Use dark mode",
@@ -197,7 +197,7 @@ export default function FarmerNotifications() {
       <main className="farmer-shell farmer-notifications__main" id="farmer-notifications-main">
         <header className="farmer-notifications__heading">
           <div>
-            <p className="farmer-notifications__eyebrow"><Bell size={15} /> Farmer-SIH</p>
+            <p className="farmer-notifications__eyebrow"><Bell size={15} /> KisanSetu</p>
             <h1>{copy.title}</h1>
           </div>
           <span className="farmer-notifications__heading-icon" aria-hidden="true"><Bell size={23} /></span>

@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import { Search, X, Phone, MapPin, Sprout, Calendar } from "lucide-react";
+import { Search, X, Phone, MapPin, Sprout, Calendar, Users, RefreshCw, AlertCircle } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { getFarmers } from "../../api/admin/farmer";
+import { Badge, LoadingRows, TableScroll } from "../../components/admin/ui";
+import "./farmers.css";
 
 export default function Farmers() {
   const [farmers, setFarmers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
 
@@ -18,7 +21,9 @@ export default function Farmers() {
     try {
       const data = await getFarmers();
       setFarmers(Array.isArray(data) ? data : data.farmers || []);
+      setError(false);
     } catch {
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -43,119 +48,116 @@ export default function Farmers() {
 
   return (
     <AdminLayout eyebrow="Farmer directory" title="Farmers">
-      <p className="text-gray-500 -mt-4 mb-6">
-        View registered farmers and their crop and mandi details.
-      </p>
-
-      <div className="bg-surface rounded-2xl border border-border overflow-hidden">
-        <div className="p-4 border-b border-black/5 relative">
-          <Search
-            size={16}
-            className="absolute left-8 top-1/2 -translate-y-1/2 text-gray-400"
-          />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search name, mobile, crop..."
-            className="w-full max-w-sm pl-9 pr-4 py-2.5 rounded-xl bg-surface-soft text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary"
-          />
+      <div className="farmers-page">
+        <div className="farmers-intro">
+          <div>
+            <p className="text-muted">A clear view of the farmers registered in your mandi network.</p>
+          </div>
+          <div className="farmers-summary" aria-label="Farmer directory summary">
+            <span><strong>{farmers.length}</strong> registered</span>
+            {search && <span><strong>{filteredFarmers.length}</strong> matching</span>}
+          </div>
         </div>
 
-        {loading ? (
-          <div className="p-8 space-y-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-14 rounded-xl bg-gray-100 animate-pulse" />
-            ))}
+        <div className="farmers-panel">
+          <div className="farmers-toolbar">
+            <div className="farmers-search">
+              <Search size={17} aria-hidden="true" />
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by name, mobile, or crop"
+                aria-label="Search farmers"
+              />
+              {search && <button type="button" onClick={() => setSearch("")} aria-label="Clear farmer search"><X size={16} /></button>}
+            </div>
+            <span className="farmers-toolbar-note"><Users size={16} /> Directory records</span>
           </div>
-        ) : filteredFarmers.length === 0 ? (
-          <div className="p-12 flex flex-col items-center text-center">
-           <div className="w-12 h-12 rounded-full bg-accent-soft flex items-center justify-center mb-3">
-  <Search size={20} className="text-on-primary" />
-</div>
-<p className="font-semibold text-accent">No farmers registered yet</p>
-<p className="text-muted text-sm mt-1">Farmers will show up here once they register.</p>
-          </div>
-        ) : (
-          <table className="w-full text-sm">
-  <thead>
-    <tr className="text-left text-muted bg-surface-soft">
-      <th className="font-medium px-6 py-3">Farmer</th>
-      <th className="font-medium px-6 py-3">Mobile</th>
-      <th className="font-medium px-6 py-3">Crop</th>
-      <th className="font-medium px-6 py-3">Mandi</th>
-    </tr>
-  </thead>
-  <tbody>
-    {filteredFarmers.map((farmer) => (
-      <tr
-        key={farmer._id}
-        onClick={() => setSelected(farmer)}
-        className="border-t border-border cursor-pointer hover:bg-surface-soft"
-      >
-        <td className="px-6 py-4 font-medium text-ink">
-          {farmer.name}
-        </td>
-        <td className="px-6 py-4 text-muted">{farmer.mobile}</td>
-        <td className="px-6 py-4 text-muted">
-          {farmer.cropType || "—"}
-        </td>
-        <td className="px-6 py-4 text-muted">
-          {mandiLabel(farmer.mandi)}
-        </td>
-      </tr>
-    ))}
-  </tbody>
-</table>
-        
-        )}
+
+          {loading ? (
+            <LoadingRows count={4} className="farmers-loading" />
+          ) : error ? (
+            <div className="farmers-state">
+              <div className="farmers-state-icon is-error"><AlertCircle size={21} /></div>
+              <p>We couldn&apos;t load the farmer directory</p>
+              <span>Check the connection and try again.</span>
+              <button type="button" onClick={fetchFarmers}><RefreshCw size={15} /> Try again</button>
+            </div>
+          ) : filteredFarmers.length === 0 ? (
+            <div className="farmers-state">
+              <div className="farmers-state-icon"><Users size={21} /></div>
+              <p>{search ? "No matching farmers" : "No farmers registered yet"}</p>
+              <span>{search ? "Try a different name, mobile, or crop." : "Farmers will show up here once they register."}</span>
+            </div>
+          ) : (
+            <>
+              <div className="farmers-mobile-list">
+                {filteredFarmers.map((farmer) => <FarmerCard key={farmer._id || farmer.mobile || farmer.name} farmer={farmer} mandiLabel={mandiLabel} onClick={() => setSelected(farmer)} />)}
+              </div>
+              <TableScroll>
+                <table className="farmers-table">
+                  <thead><tr><th>Farmer</th><th>Mobile</th><th>Crop</th><th>Mandi</th><th>Status</th></tr></thead>
+                  <tbody>{filteredFarmers.map((farmer) => (
+                    <tr key={farmer._id || farmer.mobile || farmer.name} onClick={() => setSelected(farmer)} tabIndex="0" onKeyDown={(event) => event.key === "Enter" && setSelected(farmer)}>
+                      <td><div className="farmer-name"><span>{farmer.name?.charAt(0) || "F"}</span><strong>{farmer.name || "Unnamed farmer"}</strong></div></td>
+                      <td>{farmer.mobile || "—"}</td><td>{farmer.cropType || "—"}</td><td>{mandiLabel(farmer.mandi)}</td><td><Badge tone="success">Registered</Badge></td>
+                    </tr>
+                  ))}</tbody>
+                </table>
+              </TableScroll>
+            </>
+          )}
+        </div>
       </div>
 
       {selected && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
           <div className="bg-surface rounded-2xl w-full max-w-sm p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-semibold text-ink">
-  Farmer details
-</h2>
-...
-<button
-  onClick={() => setSelected(null)}
-  className="text-muted hover:text-ink"
-></button>
+              <h2 className="font-display text-lg font-semibold text-ink">
+                Farmer details
+              </h2>
+              <button
+                onClick={() => setSelected(null)}
+                className="text-muted hover:text-ink"
+                aria-label="Close farmer details"
+              >
+                <X size={18} />
+              </button>
             </div>
 
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-12 h-12 rounded-full bg-[#1E4635] text-white flex items-center justify-center font-semibold text-lg">
+              <div className="w-12 h-12 rounded-full bg-primary text-on-primary flex items-center justify-center font-semibold text-lg">
                 {selected.name?.charAt(0) || "F"}
               </div>
               <div>
-                <p className="font-semibold text-gray-900">{selected.name}</p>
-                <p className="text-gray-500 text-sm">Farmer</p>
+                <p className="font-semibold text-ink">{selected.name}</p>
+                <p className="text-muted text-sm">Farmer</p>
               </div>
             </div>
 
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-3">
-                <Phone size={16} className="text-gray-400" />
-                <span className="text-gray-700">{selected.mobile}</span>
+                <Phone size={16} className="text-muted" />
+                <span className="text-ink">{selected.mobile}</span>
               </div>
               <div className="flex items-center gap-3">
-                <Sprout size={16} className="text-gray-400" />
-                <span className="text-gray-700">
+                <Sprout size={16} className="text-muted" />
+                <span className="text-ink">
                   {selected.cropType || "Crop not specified"}
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <MapPin size={16} className="text-gray-400" />
-                <span className="text-gray-700">
+                <MapPin size={16} className="text-muted" />
+                <span className="text-ink">
                   {mandiLabel(selected.mandi)}
                 </span>
               </div>
               {selected.createdAt && (
                 <div className="flex items-center gap-3">
-                  <Calendar size={16} className="text-gray-400" />
-                  <span className="text-gray-700">
+                  <Calendar size={16} className="text-muted" />
+                  <span className="text-ink">
                     Registered{" "}
                     {new Date(selected.createdAt).toLocaleDateString("en-IN", {
                       day: "numeric",
@@ -177,5 +179,14 @@ export default function Farmers() {
         </div>
       )}
     </AdminLayout>
+  );
+}
+
+function FarmerCard({ farmer, mandiLabel, onClick }) {
+  return (
+    <button type="button" className="farmer-card" onClick={onClick}>
+      <span className="farmer-card-top"><span className="farmer-avatar">{farmer.name?.charAt(0) || "F"}</span><span><strong>{farmer.name || "Unnamed farmer"}</strong><small>{farmer.mobile || "Mobile not available"}</small></span><Badge tone="success">Registered</Badge></span>
+      <span className="farmer-card-details"><span><Sprout size={14} />{farmer.cropType || "Crop not specified"}</span><span><MapPin size={14} />{mandiLabel(farmer.mandi)}</span></span>
+    </button>
   );
 }

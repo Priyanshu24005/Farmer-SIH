@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { Wallet, CheckCircle2 } from "lucide-react";
+import { Wallet, CheckCircle2, Clock } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { getPayments, markPaymentPaid } from "../../api/admin/payment";
+import { Card, StatCard, Badge, EmptyState, LoadingRows, TableScroll } from "../../components/admin/ui";
 
 export default function Payments() {
   const [payments, setPayments] = useState([]);
@@ -19,6 +20,7 @@ export default function Payments() {
       const data = await getPayments();
       setPayments(Array.isArray(data) ? data : data.payments || []);
     } catch {
+      // Keep the existing empty payment state when loading fails.
     } finally {
       setLoading(false);
     }
@@ -33,6 +35,7 @@ export default function Payments() {
       );
       toast.success("Marked as paid");
     } catch {
+      // Keep the existing payment state when updating fails.
     } finally {
       setPayingId(null);
     }
@@ -53,41 +56,33 @@ export default function Payments() {
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <div className="bg-surface rounded-2xl border border-border border-t-2 border-t-accent p-5">
-          <p className="text-muted text-sm mb-1">Pending payout</p>
-          <p className="font-display text-3xl font-semibold text-ink">
-            ₹{totalPending.toLocaleString("en-IN")}
-          </p>
-        </div>
-        <div className="bg-surface rounded-2xl border border-border border-t-2 border-t-primary p-5">
-          <p className="text-muted text-sm mb-1">Paid out</p>
-          <p className="font-display text-3xl font-semibold text-ink">
-            ₹{totalPaid.toLocaleString("en-IN")}
-          </p>
-        </div>
+        <StatCard
+          label="Pending payout"
+          value={`₹${totalPending.toLocaleString("en-IN")}`}
+          sub={`${payments.filter((p) => p.status !== "paid").length} awaiting settlement`}
+          icon={Clock}
+          iconTone="amber"
+        />
+        <StatCard
+          label="Paid out"
+          value={`₹${totalPaid.toLocaleString("en-IN")}`}
+          sub={`${payments.filter((p) => p.status === "paid").length} settled to farmers`}
+          icon={CheckCircle2}
+        />
       </div>
 
-      <div className="bg-surface rounded-2xl border border-border overflow-hidden">
+      <Card>
         {loading ? (
-          <div className="p-8 space-y-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-14 rounded-xl bg-surface-soft animate-pulse" />
-            ))}
-          </div>
+          <LoadingRows count={3} />
         ) : payments.length === 0 ? (
-          <div className="p-12 flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-full bg-accent-soft flex items-center justify-center mb-3">
-              <Wallet size={20} className="text-sidebar" />
-            </div>
-            <p className="font-display font-semibold text-ink text-lg">
-              No payments yet
-            </p>
-            <p className="text-muted text-sm mt-1">
-              Payments appear here once procurement is logged.
-            </p>
-          </div>
+          <EmptyState
+            icon={Wallet}
+            title="No payments yet"
+            hint="Payments appear here once procurement is logged."
+          />
         ) : (
-          <table className="w-full text-sm">
+          <TableScroll>
+          <table className="w-full text-sm min-w-[720px]">
             <thead>
               <tr className="text-left text-muted bg-surface-soft">
                 <th className="font-medium px-6 py-3">Farmer</th>
@@ -118,15 +113,9 @@ export default function Payments() {
                       ₹{p.amount?.toLocaleString("en-IN")}
                     </td>
                     <td className="px-6 py-4">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                          isPaid
-                            ? "bg-primary/15 text-primary"
-                            : "bg-accent-soft/20 text-ink"
-                        }`}
-                      >
+                      <Badge tone={isPaid ? "success" : "warning"}>
                         {isPaid ? "Paid" : "Pending"}
-                      </span>
+                      </Badge>
                     </td>
                     <td className="px-6 py-4 text-right">
                       {!isPaid && (
@@ -145,8 +134,9 @@ export default function Payments() {
               })}
             </tbody>
           </table>
+          </TableScroll>
         )}
-      </div>
+      </Card>
     </AdminLayout>
   );
 }

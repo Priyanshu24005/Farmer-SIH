@@ -1,33 +1,39 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowRight, Eye, EyeOff, LockKeyhole, Loader2, ShieldCheck, Sprout } from 'lucide-react';
 import { loginAdmin } from '../../api/auth';
 import { toast } from 'react-toastify';
+import { FieldInput, FieldLabel } from '../../components/admin/ui';
+import './adminAuth.css';
 
 const Login = () => {
   const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!mobile || !password) {
-      toast.error('Please enter mobile and password');
+    if (!mobile.trim() || !password) {
+      setError('Enter your mobile number and password to continue.');
       return;
     }
 
+    setError('');
     setLoading(true);
     try {
       const data = await loginAdmin(mobile, password);
 
       if (data.role !== 'admin') {
-        toast.error('This login is for admin accounts only');
-        setLoading(false);
+        setError('This account does not have Admin Portal access.');
         return;
       }
 
       localStorage.setItem('token', data.token);
+      localStorage.setItem('role', data.role);
       localStorage.setItem('user', JSON.stringify({
         _id: data._id,
         name: data.name,
@@ -38,63 +44,34 @@ const Login = () => {
       toast.success(`Welcome back, ${data.name}`);
       navigate('/admin/dashboard');
     } catch (err) {
-      // axios instance's interceptor already toasts on error;
-      // this catch just stops the loading spinner
+      setError(err.response?.data?.message || 'We could not sign you in. Check your details and try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg px-4">
-      <div className="w-full max-w-sm bg-surface border border-border rounded-2xl shadow-sm p-8">
-        <h1 className="font-display text-2xl text-ink text-center mb-1">
-          Admin Login
-        </h1>
-        <p className="text-muted text-sm text-center mb-6">
-          Sign in to manage mandi operations
-        </p>
+    <div className="admin-theme admin-auth-page">
+      <section className="admin-auth-aside">
+        <div className="admin-brand"><span className="admin-brand-mark"><Sprout size={21} /></span><span><strong>KisanSetu</strong><small>Admin operations</small></span></div>
+        <div className="admin-auth-message"><p className="admin-kicker"><ShieldCheck size={15} /> Secure workspace</p><h1>Keep every mandi moving.</h1><p>One calm workspace for the people coordinating farmers, queues, procurement, and payments.</p></div>
+        <div className="admin-auth-aside-footer"><LockKeyhole size={15} /> Protected access for authorized administrators</div>
+      </section>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm text-muted mb-1">Mobile Number</label>
-            <input
-              type="tel"
-              value={mobile}
-              onChange={(e) => setMobile(e.target.value)}
-              placeholder="10-digit mobile number"
-              className="w-full rounded-lg border border-border bg-surface-soft text-ink px-3 py-2
-                         focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-muted mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full rounded-lg border border-border bg-surface-soft text-ink px-3 py-2
-                         focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-primary text-on-primary font-medium rounded-lg py-2.5
-                       hover:opacity-90 transition disabled:opacity-60"
-          >
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
-
-        <p className="text-xs text-muted text-center mt-6">
-          Admin accounts are provisioned by the system administrator.
-          No self-registration.
-        </p>
-      </div>
+      <main className="admin-auth-main">
+        <div className="admin-auth-card">
+          <div className="admin-auth-card-header"><span className="admin-mobile-mark"><Sprout size={19} /></span><p className="admin-kicker">Admin Portal</p><h2>Sign in to your workspace</h2><p>Manage daily mandi operations with clarity and confidence.</p></div>
+          <form onSubmit={handleSubmit} className="admin-auth-form" noValidate>
+            <div><FieldLabel>Mobile number</FieldLabel><FieldInput type="tel" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="10-digit mobile number" autoComplete="username" /></div>
+            <div><div className="admin-field-label-row"><FieldLabel>Password</FieldLabel></div><div className="admin-password-field"><FieldInput type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" autoComplete="current-password" /><button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? 'Hide password' : 'Show password'}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div></div>
+            {error && <p className="admin-auth-error" role="alert">{error}</p>}
+            <button type="submit" disabled={loading} className="admin-primary-button">{loading ? <><Loader2 size={17} className="animate-spin" /> Signing in...</> : <>Sign In <ArrowRight size={17} /></>}</button>
+          </form>
+          <div className="admin-auth-divider"><span>New administrator?</span></div>
+          <button type="button" className="admin-secondary-button" onClick={() => navigate('/admin/register')}>Create Admin Account</button>
+          <p className="admin-auth-note">Admin access is provisioned by the system administrator.</p>
+        </div>
+      </main>
     </div>
   );
 };

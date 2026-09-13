@@ -11,7 +11,7 @@ import "./farmerLogin.css";
 const COPY = {
   en: {
     brandSubtitle: "Kisan Mandi Portal",
-    homeLabel: "Farmer-SIH home",
+    homeLabel: "KisanSetu home",
     backLabel: "Back",
     languageLabel: "Choose language",
     useDarkMode: "Use dark mode",
@@ -28,7 +28,7 @@ const COPY = {
     hidePassword: "Hide password",
     continueCta: "Login",
     loadingText: "Logging in...",
-    registerPrompt: "New to Farmer-SIH?",
+    registerPrompt: "New to KisanSetu?",
     registerCta: "Create an account",
     secureText: "Your information is secure.",
     invalidCredentials: "Incorrect mobile number or password.",

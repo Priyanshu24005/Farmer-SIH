@@ -6,6 +6,10 @@ export const bookToken = async (req, res) => {
   try {
     const { farmer, mandi, date } = req.body;
 
+    if (req.farmer?._id.toString() !== farmer) {
+      return res.status(403).json({ message: 'You can only book a token for yourself' });
+    }
+
     if (!farmer || !mandi || !date) {
       return res.status(400).json({ message: 'farmer, mandi, and date are all required' });
     }
@@ -109,6 +113,9 @@ export const updateTokenStatus = async (req, res) => {
 // Get all tokens for a specific farmer (history)
 export const getFarmerTokens = async (req, res) => {
   try {
+    if (req.farmer?.role !== 'admin' && req.farmer?._id.toString() !== req.params.farmerId) {
+      return res.status(403).json({ message: 'You can only access your own tokens' });
+    }
     const tokens = await Token.find({ farmer: req.params.farmerId })
       .populate('mandi', 'name location')
       .sort({ createdAt: -1 });
