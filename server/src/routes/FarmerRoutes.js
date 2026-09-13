@@ -11,7 +11,7 @@ import { protect, requireAdmin, requireSelf } from '../middleware/authMiddleware
 const router = express.Router();
 
 router.post('/', protect, requireAdmin, createFarmer);
-router.get('/', getFarmers);
+router.get('/', protect, requireAdmin, getFarmers);
 router.get('/:id', protect, requireSelf('id'), getFarmerById);
 router.put('/:id', protect, requireSelf('id'), updateFarmer);
 router.delete('/:id', protect, requireAdmin, deleteFarmer);

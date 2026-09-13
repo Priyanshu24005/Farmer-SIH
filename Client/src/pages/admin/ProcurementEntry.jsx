@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Sprout, Scale, CheckCircle2 } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
@@ -20,6 +20,18 @@ export default function ProcurementEntry() {
   const [qualityGrade, setQualityGrade] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  const fetchQueue = useCallback(async () => {
+    setLoadingQueue(true);
+    try {
+      const data = await getQueue(selectedMandi);
+      setQueue(Array.isArray(data) ? data : data.queue || []);
+    } catch {
+      // Keep the existing queue state when loading fails.
+    } finally {
+      setLoadingQueue(false);
+    }
+  }, [selectedMandi]);
+
   useEffect(() => {
     const loadMandis = async () => {
       try {
@@ -40,19 +52,7 @@ export default function ProcurementEntry() {
     if (!selectedMandi) return;
     fetchQueue();
     setSelectedToken(null);
-  }, [selectedMandi]);
-
-  const fetchQueue = async () => {
-    setLoadingQueue(true);
-    try {
-      const data = await getQueue(selectedMandi);
-      setQueue(Array.isArray(data) ? data : data.queue || []);
-    } catch {
-      // Keep the existing queue state when loading fails.
-    } finally {
-      setLoadingQueue(false);
-    }
-  };
+  }, [fetchQueue, selectedMandi]);
 
   const estimatedAmount =
     quantityKg && qualityGrade

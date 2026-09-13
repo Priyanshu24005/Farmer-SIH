@@ -11,9 +11,9 @@ import { protect, requireAdmin, requireFarmer, requireSelf } from '../middleware
 const router = express.Router();
 
 router.post('/', protect, requireFarmer, bookToken);
-router.get('/mandi/:mandiId/queue', getMandiQueue);
+router.get('/mandi/:mandiId/queue', protect, getMandiQueue);
 router.get('/farmer/:farmerId', protect, requireSelf('farmerId'), getFarmerTokens);
-router.get('/:id', getTokenById);
+router.get('/:id', protect, getTokenById);
 router.put('/:id/status', protect, requireAdmin, updateTokenStatus);
 
 export default router;

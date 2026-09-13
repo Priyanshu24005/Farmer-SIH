@@ -28,7 +28,9 @@ import ProtectedRoute from "./components/admin/ProtectedRoute";
 
 function getStoredRole() {
   try {
-    return localStorage.getItem("admin-role") || localStorage.getItem("farmer-role");
+    if (localStorage.getItem("admin-token") && localStorage.getItem("admin-role") === "admin") return "admin";
+    if (localStorage.getItem("farmer-token") && localStorage.getItem("farmer-role") === "farmer") return "farmer";
+    return null;
   } catch {
     return null;
   }
@@ -36,7 +38,9 @@ function getStoredRole() {
 
 function getStoredToken() {
   try {
-    return localStorage.getItem("admin-token") || localStorage.getItem("farmer-token");
+    if (localStorage.getItem("admin-token") && localStorage.getItem("admin-role") === "admin") return localStorage.getItem("admin-token");
+    if (localStorage.getItem("farmer-token") && localStorage.getItem("farmer-role") === "farmer") return localStorage.getItem("farmer-token");
+    return null;
   } catch {
     return null;
   }

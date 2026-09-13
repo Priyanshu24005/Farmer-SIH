@@ -98,6 +98,10 @@ export default function FarmerLogin() {
     try {
       // Exact backend contract for POST /api/auth/login.
       const data = await loginFarmer({ mobile, password });
+      if (data.role !== "farmer") {
+        setFormError("This account does not have Farmer Portal access.");
+        return;
+      }
 
       // Persists token + role + minimal profile (id, name). Never stores
       // password or raw Aadhaar.

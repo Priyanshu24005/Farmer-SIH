@@ -155,6 +155,10 @@ export default function FarmerRegister() {
         password,
         cropType: crop,
       });
+      if (data.role !== "farmer") {
+        setFormError(copy.genericError);
+        return;
+      }
 
       // Persists token + role + minimal profile (id, name). Never stores
       // password or raw Aadhaar.
@@ -168,7 +172,7 @@ export default function FarmerRegister() {
         message: serverMsg,
         networkError: !error?.response ? error?.message : undefined,
       });
-      if (status === 409) {
+      if (status === 400 || status === 409) {
         setFormError(copy.duplicateError);
       } else {
         setFormError(copy.genericError);

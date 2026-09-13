@@ -151,7 +151,7 @@ export default function FarmerLiveQueue() {
     try {
       const tokens = await getFarmerTokens(farmerId);
       const farmerTokens = Array.isArray(tokens) ? tokens : tokens?.tokens || [];
-      const activeToken = farmerTokens.find((token) => token.status === "waiting");
+      const activeToken = farmerTokens[0];
 
       if (!activeToken) {
         setQueueData(null);
@@ -171,7 +171,7 @@ export default function FarmerLiveQueue() {
         return;
       }
 
-      const queueList = await getMandiQueue(mandiId);
+      const queueList = activeToken.status === "waiting" ? await getMandiQueue(mandiId) : [];
       const queue = Array.isArray(queueList) ? queueList : queueList?.queue || [];
       const aheadCount = activeToken.status === "waiting"
         ? queue.filter((token) => Number(token.tokenNumber) < Number(activeToken.tokenNumber)).length

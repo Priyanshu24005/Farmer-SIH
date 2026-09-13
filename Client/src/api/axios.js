@@ -1,4 +1,4 @@
-﻿import axios from "axios";
+import axios from "axios";
 import { toast } from "react-toastify";
 
 const api = axios.create({
@@ -17,13 +17,6 @@ function getAuthHeaders() {
     return { Authorization: 'Bearer ' + adminToken };
   }
   if (!isAdmin && farmerToken) {
-    return { Authorization: 'Bearer ' + farmerToken };
-  }
-  // Fallback: use whichever token exists
-  if (adminToken) {
-    return { Authorization: 'Bearer ' + adminToken };
-  }
-  if (farmerToken) {
     return { Authorization: 'Bearer ' + farmerToken };
   }
   return {};
@@ -54,11 +47,14 @@ api.interceptors.response.use(
       const isAdmin = typeof window !== "undefined" && window.location.pathname.startsWith("/admin");
       if (isAdmin) {
         localStorage.removeItem("admin-token");
+        localStorage.removeItem("admin-role");
         localStorage.removeItem("admin-user");
         window.location.href = "/admin/login";
       } else {
         localStorage.removeItem("farmer-token");
+        localStorage.removeItem("farmer-role");
         localStorage.removeItem("farmer-profile");
+        localStorage.removeItem("farmer-sih-profile");
         window.location.href = "/farmer/login";
       }
     } else if (status === 404) {
