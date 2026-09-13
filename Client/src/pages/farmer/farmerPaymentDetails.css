@@ -1,0 +1,421 @@
+.farmer-payment-details {
+  min-height: 100vh;
+  padding-bottom: 96px;
+}
+
+.farmer-payment-details__main {
+  width: min(100%, 860px);
+  padding-top: 24px;
+  padding-bottom: 38px;
+}
+
+.farmer-payment-details__heading,
+.farmer-payment-details__method-main,
+.farmer-payment-details__procurement-top,
+.farmer-payment-details__receipt-content,
+.farmer-payment-details__support {
+  display: flex;
+  align-items: center;
+}
+
+.farmer-payment-details__heading {
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.farmer-payment-details__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  color: var(--farm-primary);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.farmer-payment-details__heading h1 {
+  margin: 0;
+  color: var(--farm-text);
+  font-size: clamp(1.55rem, 6vw, 2.1rem);
+  line-height: 1.15;
+}
+
+.farmer-payment-details__heading-icon,
+.farmer-payment-details__not-found-icon {
+  display: inline-grid;
+  width: 50px;
+  height: 50px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 16px;
+  color: var(--farm-primary);
+  background: var(--farm-soft);
+}
+
+.farmer-payment-details__hero,
+.farmer-payment-details__amount-card,
+.farmer-payment-details__card,
+.farmer-payment-details__support {
+  border: 1px solid var(--farm-line);
+  background: var(--farm-surface);
+  box-shadow: var(--farm-shadow);
+}
+
+.farmer-payment-details__hero {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 11px;
+  align-items: center;
+  padding: 16px;
+  border-left: 4px solid #2c9a5c;
+  border-radius: 17px;
+}
+
+.farmer-payment-details__hero--pending {
+  border-left-color: #d29422;
+}
+
+.farmer-payment-details__hero--failed {
+  border-left-color: #bd5448;
+}
+
+.farmer-payment-details__hero-icon {
+  display: inline-grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 50%;
+  color: #17633a;
+  background: #def4e5;
+}
+
+.farmer-payment-details__hero--pending .farmer-payment-details__hero-icon {
+  color: #8a5a00;
+  background: #fbedcb;
+}
+
+.farmer-payment-details__hero--failed .farmer-payment-details__hero-icon {
+  color: #a33a32;
+  background: #fbe4df;
+}
+
+.farmer-payment-details__hero h2 {
+  margin: 0;
+  color: var(--farm-text);
+  font-size: 0.98rem;
+}
+
+.farmer-payment-details__hero p {
+  margin: 4px 0 0;
+  color: var(--farm-muted);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.farmer-payment-details__status-badge {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #17633a;
+  background: #def4e5;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.farmer-payment-details__hero--pending .farmer-payment-details__status-badge {
+  color: #8a5a00;
+  background: #fbedcb;
+}
+
+.farmer-payment-details__hero--failed .farmer-payment-details__status-badge {
+  color: #a33a32;
+  background: #fbe4df;
+}
+
+.farmer-payment-details__amount-card {
+  margin-top: 14px;
+  padding: 22px 18px;
+  border-radius: 20px;
+  color: var(--farm-text);
+  background: linear-gradient(145deg, var(--farm-soft), var(--farm-surface));
+  text-align: center;
+}
+
+.farmer-payment-details__amount-card > span {
+  color: var(--farm-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.farmer-payment-details__amount-card > strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--farm-primary);
+  font-size: clamp(2.25rem, 10vw, 3.2rem);
+  line-height: 1;
+}
+
+.farmer-payment-details__amount-card > div {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  color: var(--farm-muted);
+  font-size: 0.78rem;
+}
+
+.farmer-payment-details__amount-card svg {
+  color: var(--farm-primary);
+}
+
+.farmer-payment-details__columns {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.farmer-payment-details__card {
+  padding: 17px;
+  border-radius: 18px;
+}
+
+.farmer-payment-details__card h2 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 14px;
+  color: var(--farm-text);
+  font-size: 0.98rem;
+}
+
+.farmer-payment-details__card h2 span,
+.farmer-payment-details__row-icon {
+  color: var(--farm-primary);
+}
+
+.farmer-payment-details__method-main {
+  gap: 10px;
+  margin-bottom: 7px;
+  color: var(--farm-text);
+  font-size: 0.88rem;
+}
+
+.farmer-payment-details__method-icon,
+.farmer-payment-details__crop-icon,
+.farmer-payment-details__receipt-icon,
+.farmer-payment-details__support-icon {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 11px;
+  color: var(--farm-primary);
+  background: var(--farm-soft);
+}
+
+.farmer-payment-details__method-icon {
+  width: 39px;
+  height: 39px;
+}
+
+.farmer-payment-details__row {
+  display: grid;
+  grid-template-columns: auto minmax(90px, 0.9fr) minmax(0, 1.35fr);
+  gap: 8px;
+  align-items: center;
+  padding: 11px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--farm-line) 70%, transparent);
+}
+
+.farmer-payment-details__row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.farmer-payment-details__row-icon {
+  display: inline-grid;
+}
+
+.farmer-payment-details__row-label {
+  color: var(--farm-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.farmer-payment-details__row-value {
+  color: var(--farm-text);
+  font-size: 0.76rem;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.farmer-payment-details__procurement-card,
+.farmer-payment-details__receipt-card {
+  margin-top: 14px;
+}
+
+.farmer-payment-details__procurement-top {
+  gap: 10px;
+  margin-bottom: 5px;
+  color: var(--farm-text);
+}
+
+.farmer-payment-details__crop-icon {
+  width: 42px;
+  height: 42px;
+}
+
+.farmer-payment-details__procurement-top strong {
+  font-size: 1rem;
+}
+
+.farmer-payment-details__procurement-top small {
+  color: var(--farm-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.farmer-payment-details__procurement-grid {
+  display: grid;
+  gap: 0;
+}
+
+.farmer-payment-details__outline-button {
+  display: inline-flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 15px;
+  padding: 9px 13px;
+  border: 1px solid var(--farm-primary);
+  border-radius: 11px;
+  color: var(--farm-primary);
+  background: transparent;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.farmer-payment-details__receipt-content {
+  gap: 10px;
+}
+
+.farmer-payment-details__receipt-icon {
+  width: 40px;
+  height: 40px;
+}
+
+.farmer-payment-details__receipt-content p {
+  margin: 0;
+  color: var(--farm-muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.farmer-payment-details__receipt-card .farmer-primary-cta {
+  margin-top: 15px;
+}
+
+.farmer-payment-details__receipt-card .farmer-primary-cta:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.farmer-payment-details__inline-message,
+.farmer-payment-details__support small {
+  color: var(--farm-primary);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.farmer-payment-details__inline-message {
+  margin: 10px 0 0;
+}
+
+.farmer-payment-details__support {
+  gap: 10px;
+  margin-top: 14px;
+  padding: 13px 15px;
+  border-radius: 15px;
+}
+
+.farmer-payment-details__support-icon {
+  width: 34px;
+  height: 34px;
+}
+
+.farmer-payment-details__support div {
+  display: grid;
+  flex: 1;
+  gap: 3px;
+}
+
+.farmer-payment-details__support strong {
+  color: var(--farm-text);
+  font-size: 0.78rem;
+}
+
+.farmer-payment-details__support button {
+  min-height: 40px;
+  padding: 8px 11px;
+  border: 1px solid var(--farm-primary);
+  border-radius: 10px;
+  color: var(--farm-primary);
+  background: transparent;
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.farmer-payment-details__not-found {
+  display: flex;
+  min-height: 60vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-block: 36px;
+  text-align: center;
+}
+
+.farmer-payment-details__not-found h1 {
+  margin: 16px 0 0;
+  color: var(--farm-text);
+  font-size: 1.35rem;
+}
+
+.farmer-payment-details__not-found p {
+  margin: 7px 0 0;
+  color: var(--farm-muted);
+}
+
+.farmer-payment-details__not-found .farmer-primary-cta {
+  width: auto;
+  margin-top: 20px;
+}
+
+@media (min-width: 680px) {
+  .farmer-payment-details__main {
+    padding-top: 34px;
+  }
+
+  .farmer-payment-details__columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .farmer-payment-details__procurement-card,
+  .farmer-payment-details__receipt-card,
+  .farmer-payment-details__support {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .farmer-payment-details button {
+    transition: none;
+  }
+}

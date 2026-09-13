@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const farmerSchema = new mongoose.Schema({
   name: { type: String, required: true },
   mobile: { type: String, required: true, unique: true },
-  aadhaar: { type: String },
+  aadhaar: { type: String, unique: true, sparse: true },
   password: { type: String, required: true },
   cropType: { type: String },
   role: { type: String, enum: ['farmer', 'admin'], default: 'farmer' },

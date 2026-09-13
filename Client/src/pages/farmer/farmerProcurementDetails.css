@@ -1,0 +1,476 @@
+.farmer-procurement-details {
+  min-height: 100vh;
+  padding-bottom: 96px;
+}
+
+.farmer-procurement-details__main {
+  width: min(100%, 860px);
+  padding-top: 24px;
+  padding-bottom: 38px;
+}
+
+.farmer-procurement-details__heading,
+.farmer-procurement-details__summary-head,
+.farmer-procurement-details__card-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.farmer-procurement-details__heading {
+  margin-bottom: 18px;
+}
+
+.farmer-procurement-details__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  color: var(--farm-primary);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.farmer-procurement-details__heading h1 {
+  margin: 0;
+  color: var(--farm-text);
+  font-size: clamp(1.55rem, 6vw, 2.1rem);
+  line-height: 1.15;
+}
+
+.farmer-procurement-details__heading-icon,
+.farmer-procurement-details__not-found-icon {
+  display: inline-grid;
+  width: 50px;
+  height: 50px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 16px;
+  color: var(--farm-primary);
+  background: var(--farm-soft);
+}
+
+.farmer-procurement-details__status-view {
+  display: grid;
+  gap: 9px;
+  margin-bottom: 14px;
+  color: var(--farm-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.farmer-procurement-details__status-view > div {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--farm-line);
+  border-radius: 13px;
+  background: var(--farm-surface);
+}
+
+.farmer-procurement-details__status-option {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 9px;
+  color: var(--farm-muted);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.farmer-procurement-details__status-option.is-active {
+  color: #fff;
+  background: var(--farm-primary);
+}
+
+.farmer-procurement-details__complete,
+.farmer-procurement-details__summary,
+.farmer-procurement-details__receipt,
+.farmer-procurement-details__card {
+  border: 1px solid var(--farm-line);
+  background: var(--farm-surface);
+  box-shadow: var(--farm-shadow);
+}
+
+.farmer-procurement-details__complete {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 11px;
+  align-items: center;
+  padding: 15px;
+  border-left: 4px solid var(--farm-primary);
+  border-radius: 16px;
+}
+
+.farmer-procurement-details__complete-icon {
+  display: inline-grid;
+  width: 35px;
+  height: 35px;
+  place-items: center;
+  border-radius: 50%;
+  color: #17633a;
+  background: #def4e5;
+}
+
+.farmer-procurement-details__complete h2 {
+  margin: 0;
+  color: var(--farm-text);
+  font-size: 0.95rem;
+}
+
+.farmer-procurement-details__complete p {
+  margin: 4px 0 0;
+  color: var(--farm-muted);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.farmer-procurement-details__badge,
+.farmer-procurement-details__card-title-row > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #17633a;
+  background: #def4e5;
+  font-size: 0.68rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.farmer-procurement-details__summary {
+  margin-top: 14px;
+  padding: 18px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, var(--farm-soft), var(--farm-surface));
+}
+
+.farmer-procurement-details__summary-head p,
+.farmer-procurement-details__summary-head strong {
+  display: block;
+  margin: 0;
+}
+
+.farmer-procurement-details__summary-head p {
+  color: var(--farm-muted);
+  font-size: 0.73rem;
+  font-weight: 700;
+}
+
+.farmer-procurement-details__summary-head strong {
+  margin-top: 3px;
+  color: var(--farm-primary);
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.farmer-procurement-details__trust {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--farm-primary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: right;
+}
+
+.farmer-procurement-details__summary-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 13px;
+  color: var(--farm-muted);
+  font-size: 0.78rem;
+}
+
+.farmer-procurement-details__summary-date svg {
+  color: var(--farm-primary);
+}
+
+.farmer-procurement-details__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 17px;
+}
+
+.farmer-procurement-details__metric {
+  min-width: 0;
+  padding: 12px 9px;
+  border: 1px solid var(--farm-line);
+  border-radius: 13px;
+  background: var(--farm-surface);
+}
+
+.farmer-procurement-details__metric-icon {
+  display: inline-grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 9px;
+  color: var(--farm-primary);
+  background: var(--farm-soft);
+}
+
+.farmer-procurement-details__metric-label,
+.farmer-procurement-details__metric strong,
+.farmer-procurement-details__metric small {
+  display: block;
+}
+
+.farmer-procurement-details__metric-label {
+  margin-top: 9px;
+  color: var(--farm-muted);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.farmer-procurement-details__metric strong {
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+  color: var(--farm-text);
+  font-size: clamp(0.92rem, 4vw, 1.2rem);
+}
+
+.farmer-procurement-details__metric small {
+  margin-top: 3px;
+  color: var(--farm-muted);
+  font-size: 0.68rem;
+}
+
+.farmer-procurement-details__grade {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 13px;
+  border-top: 1px dashed var(--farm-line);
+  color: var(--farm-muted);
+  font-size: 0.78rem;
+}
+
+.farmer-procurement-details__grade strong {
+  color: var(--farm-text);
+  text-align: right;
+}
+
+.farmer-procurement-details__receipt {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 14px;
+  padding: 13px 15px;
+  border-radius: 14px;
+}
+
+.farmer-procurement-details__receipt-icon {
+  display: inline-grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 9px;
+  color: var(--farm-primary);
+  background: var(--farm-soft);
+}
+
+.farmer-procurement-details__receipt strong {
+  flex: 1;
+  color: var(--farm-text);
+  font-size: 0.8rem;
+}
+
+.farmer-procurement-details__receipt button,
+.farmer-procurement-details__outline-button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 11px;
+  border: 1px solid var(--farm-primary);
+  border-radius: 10px;
+  color: var(--farm-primary);
+  background: transparent;
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.farmer-procurement-details__columns {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.farmer-procurement-details__card {
+  padding: 17px;
+  border-radius: 18px;
+}
+
+.farmer-procurement-details__card h2 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: var(--farm-text);
+  font-size: 0.95rem;
+}
+
+.farmer-procurement-details__card h2 svg {
+  color: var(--farm-primary);
+}
+
+.farmer-procurement-details__row {
+  display: grid;
+  grid-template-columns: auto minmax(88px, 0.8fr) minmax(0, 1.35fr);
+  gap: 8px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--farm-line) 70%, transparent);
+}
+
+.farmer-procurement-details__row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.farmer-procurement-details__row-icon {
+  display: inline-grid;
+  color: var(--farm-primary);
+}
+
+.farmer-procurement-details__row-label {
+  color: var(--farm-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.farmer-procurement-details__row-value {
+  color: var(--farm-text);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.farmer-procurement-details__row-value small {
+  display: block;
+  margin-top: 3px;
+  color: var(--farm-primary);
+  font-size: 0.66rem;
+}
+
+.farmer-procurement-details__payment {
+  background: linear-gradient(145deg, var(--farm-surface), var(--farm-soft));
+}
+
+.farmer-procurement-details__payment .farmer-procurement-details__card-title-row > span {
+  color: #17633a;
+  background: #def4e5;
+}
+
+.farmer-procurement-details__payment-amount {
+  margin: 18px 0 5px;
+  color: var(--farm-primary);
+  font-size: 1.8rem;
+  font-weight: 900;
+}
+
+.farmer-procurement-details__outline-button {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.farmer-procurement-details__mandi {
+  margin-top: 14px;
+}
+
+.farmer-procurement-details__mandi > strong {
+  display: block;
+  margin-top: 18px;
+  color: var(--farm-text);
+  font-size: 1rem;
+}
+
+.farmer-procurement-details__mandi > p {
+  margin: 5px 0 0;
+  color: var(--farm-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.farmer-procurement-details__location-status {
+  color: var(--farm-muted) !important;
+  background: transparent !important;
+  font-size: 0.66rem !important;
+}
+
+.farmer-procurement-details__location-status span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #28a765;
+}
+
+.farmer-procurement-details__not-found {
+  display: flex;
+  min-height: 60vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-block: 36px;
+  text-align: center;
+}
+
+.farmer-procurement-details__not-found h1 {
+  margin: 16px 0 0;
+  color: var(--farm-text);
+  font-size: 1.35rem;
+}
+
+.farmer-procurement-details__not-found p {
+  margin: 7px 0 0;
+  color: var(--farm-muted);
+}
+
+.farmer-procurement-details__not-found .farmer-primary-cta {
+  width: auto;
+  margin-top: 20px;
+}
+
+@media (min-width: 680px) {
+  .farmer-procurement-details__main {
+    padding-top: 34px;
+  }
+
+  .farmer-procurement-details__status-view {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .farmer-procurement-details__status-view > div {
+    width: min(100%, 420px);
+  }
+
+  .farmer-procurement-details__columns {
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+    align-items: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .farmer-procurement-details button {
+    transition: none;
+  }
+}
