@@ -32,9 +32,9 @@ const Login = () => {
         return;
       }
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('role', data.role);
-      localStorage.setItem('user', JSON.stringify({
+      localStorage.setItem("admin-token", data.token);
+      localStorage.setItem("admin-role", data.role);
+      localStorage.setItem("admin-user", JSON.stringify({
         _id: data._id,
         name: data.name,
         mobile: data.mobile,
@@ -67,8 +67,6 @@ const Login = () => {
             {error && <p className="admin-auth-error" role="alert">{error}</p>}
             <button type="submit" disabled={loading} className="admin-primary-button">{loading ? <><Loader2 size={17} className="animate-spin" /> Signing in...</> : <>Sign In <ArrowRight size={17} /></>}</button>
           </form>
-          <div className="admin-auth-divider"><span>New administrator?</span></div>
-          <button type="button" className="admin-secondary-button" onClick={() => navigate('/admin/register')}>Create Admin Account</button>
           <p className="admin-auth-note">Admin access is provisioned by the system administrator.</p>
         </div>
       </main>

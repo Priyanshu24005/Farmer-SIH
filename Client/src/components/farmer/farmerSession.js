@@ -1,11 +1,12 @@
 // Farmer session helpers — thin wrapper over the auth data the existing
 // architecture already persists.
 //
-// The axios client (src/api/axios.js) reads the JWT from localStorage["token"],
-// so that key is the established contract. We additionally cache a SMALL,
-// non-sensitive profile (id, name) captured from the /auth/register|login
-// response so the dashboard can greet the farmer and, in future, fetch their
-// real tokens via GET /tokens/farmer/:farmerId. No Aadhaar / password is stored.
+// The axios client (src/api/axios.js) reads the JWT from
+// localStorage["farmer-token"], so that key is the established contract.
+// We additionally cache a SMALL, non-sensitive profile (id, name) captured
+// from the /auth/register|login response so the dashboard can greet the
+// farmer and, in future, fetch their real tokens via
+// GET /tokens/farmer/:farmerId. No Aadhaar / password is stored.
 
 const PROFILE_KEY = "farmer-sih-profile";
 
@@ -21,20 +22,11 @@ export function saveFarmerProfile(profile) {
   }
 }
 
-// Call this once, right after a successful POST /auth/login or
-// POST /auth/register response. Persists everything the rest of the app
-// needs: the JWT (read by src/api/axios.js on every request), the role, and
-// a small non-sensitive profile (id + name). Never pass in password/Aadhaar.
-//
-// NOTE: the backend does not yet return `role` on these responses (see
-// api/farmer/auth.js). Public registration/login always resolves to a
-// farmer, so we default to "farmer" here until the backend is updated to
-// send it explicitly.
 export function saveAuthSession(data) {
   if (!data) return;
   try {
-    localStorage.setItem("token", data.token || "");
-    localStorage.setItem("role", data.role || "farmer");
+    localStorage.setItem("farmer-token", data.token || "");
+    localStorage.setItem("farmer-role", data.role || "farmer");
     saveFarmerProfile({ _id: data._id || data.id, name: data.name });
   } catch {
     // Non-fatal.
@@ -52,7 +44,15 @@ export function getFarmerProfile() {
 
 export function getFarmerRole() {
   try {
-    return localStorage.getItem("role");
+    return localStorage.getItem("farmer-role");
+  } catch {
+    return null;
+  }
+}
+
+export function getFarmerToken() {
+  try {
+    return localStorage.getItem("farmer-token");
   } catch {
     return null;
   }
@@ -61,8 +61,8 @@ export function getFarmerRole() {
 export function clearFarmerSession() {
   try {
     localStorage.removeItem(PROFILE_KEY);
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
+    localStorage.removeItem("farmer-token");
+    localStorage.removeItem("farmer-role");
   } catch {
     // Non-fatal.
   }

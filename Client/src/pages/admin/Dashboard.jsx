@@ -39,9 +39,9 @@ export default function Dashboard() {
     year: "numeric",
   });
 
-  const admin = JSON.parse(localStorage.getItem("user") || "null") || {
-    name: "Admin",
-  };
+const admin = JSON.parse(localStorage.getItem("admin-user") || "null") || {
+      name: "Admin",
+    };
 
   const maxVal = Math.max(...chartData);
 

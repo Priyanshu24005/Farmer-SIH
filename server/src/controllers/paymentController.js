@@ -107,7 +107,10 @@ export const getFarmerPayments = async (req, res) => {
     const payments = await Payment.find({ token: { $in: tokenIds } })
       .populate({
         path: 'token',
-        populate: { path: 'mandi', select: 'name location' }
+        populate: [
+          { path: 'farmer', select: 'name mobile cropType' },
+          { path: 'mandi', select: 'name location' }
+        ]
       })
       .sort({ createdAt: -1 });
 

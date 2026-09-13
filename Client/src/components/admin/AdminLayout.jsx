@@ -60,12 +60,12 @@ function SidebarBody({ onNavigate }) {
 function LogoutButton() {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("user");
-    navigate("/admin/login", { replace: true });
-  };
+    const handleLogout = () => {
+      localStorage.removeItem("admin-token");
+      localStorage.removeItem("admin-role");
+      localStorage.removeItem("admin-user");
+      navigate("/admin/login", { replace: true });
+    };
 
   return (
     <button
@@ -138,10 +138,10 @@ export default function AdminLayout({ title, eyebrow, actions, children }) {
     }
   }
 
-  const admin = JSON.parse(localStorage.getItem("user") || "null") || {
-    name: "Admin",
-    role: "Mandi official",
-  };
+    const admin = JSON.parse(localStorage.getItem("admin-user") || "null") || {
+      name: "Admin",
+      role: "Mandi official",
+    };
 
   const searchResults = NAV_ITEMS.filter((item) =>
     item.label.toLowerCase().includes(searchQuery.trim().toLowerCase())
@@ -326,12 +326,12 @@ export default function AdminLayout({ title, eyebrow, actions, children }) {
                       <p className="text-muted text-xs">{admin.role}</p>
                     </div>
                     <button
-                      onClick={() => {
-                        localStorage.removeItem("token");
-                        localStorage.removeItem("role");
-                        localStorage.removeItem("user");
-                        navigate("/admin/login", { replace: true });
-                      }}
+                       onClick={() => {
+                         localStorage.removeItem("admin-token");
+                         localStorage.removeItem("admin-role");
+                         localStorage.removeItem("admin-user");
+                         navigate("/admin/login", { replace: true });
+                       }}
                       className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 text-left"
                     >
                       <LogOut size={16} />

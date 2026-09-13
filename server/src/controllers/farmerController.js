@@ -15,7 +15,7 @@ export const createFarmer = async (req, res) => {
 // Get all farmers
 export const getFarmers = async (req, res) => {
   try {
-    const farmers = await Farmer.find().select('-password');
+    const farmers = await Farmer.find().select('-password').populate('mandi', 'name location');
     res.status(200).json(farmers);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -25,7 +25,7 @@ export const getFarmers = async (req, res) => {
 // Get single farmer by ID
 export const getFarmerById = async (req, res) => {
   try {
-    const farmer = await Farmer.findById(req.params.id).select('-password');
+    const farmer = await Farmer.findById(req.params.id).select('-password').populate('mandi', 'name location');
     if (!farmer) return res.status(404).json({ message: 'Farmer not found' });
     res.status(200).json(farmer);
   } catch (error) {

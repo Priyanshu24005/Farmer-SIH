@@ -8,11 +8,32 @@ const api = axios.create({
   },
 });
 
+function getAuthHeaders() {
+  const isAdmin = typeof window !== "undefined" && window.location.pathname.startsWith("/admin");
+  const adminToken = localStorage.getItem("admin-token");
+  const farmerToken = localStorage.getItem("farmer-token");
+
+  if (isAdmin && adminToken) {
+    return { Authorization: 'Bearer ' + adminToken };
+  }
+  if (!isAdmin && farmerToken) {
+    return { Authorization: 'Bearer ' + farmerToken };
+  }
+  // Fallback: use whichever token exists
+  if (adminToken) {
+    return { Authorization: 'Bearer ' + adminToken };
+  }
+  if (farmerToken) {
+    return { Authorization: 'Bearer ' + farmerToken };
+  }
+  return {};
+}
+
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = 'Bearer ' + token;
+    const headers = getAuthHeaders();
+    if (Object.keys(headers).length > 0) {
+      Object.assign(config.headers, headers);
     }
     return config;
   },
@@ -30,10 +51,16 @@ api.interceptors.response.use(
 
     if (status === 401) {
       toast.error("Session expired. Please log in again.");
-      const role = JSON.parse(localStorage.getItem("user") || "null")?.role;
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      window.location.href = role === "admin" ? "/admin/login" : "/farmer/login";
+      const isAdmin = typeof window !== "undefined" && window.location.pathname.startsWith("/admin");
+      if (isAdmin) {
+        localStorage.removeItem("admin-token");
+        localStorage.removeItem("admin-user");
+        window.location.href = "/admin/login";
+      } else {
+        localStorage.removeItem("farmer-token");
+        localStorage.removeItem("farmer-profile");
+        window.location.href = "/farmer/login";
+      }
     } else if (status === 404) {
       toast.error("Not found: " + message);
     } else if (status >= 500) {

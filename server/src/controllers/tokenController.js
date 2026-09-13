@@ -79,6 +79,7 @@ export const getMandiQueue = async (req, res) => {
       status: 'waiting'
     })
       .populate('farmer', 'name mobile cropType')
+      .populate('mandi', 'name location')
       .sort({ tokenNumber: 1 });
 
     res.status(200).json(queue);
@@ -117,6 +118,7 @@ export const getFarmerTokens = async (req, res) => {
       return res.status(403).json({ message: 'You can only access your own tokens' });
     }
     const tokens = await Token.find({ farmer: req.params.farmerId })
+      .populate('farmer', 'name mobile cropType')
       .populate('mandi', 'name location')
       .sort({ createdAt: -1 });
     res.status(200).json(tokens);

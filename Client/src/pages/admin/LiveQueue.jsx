@@ -132,6 +132,8 @@ export default function LiveQueue() {
                 <th className="font-medium px-6 py-3">Token #</th>
                 <th className="font-medium px-6 py-3">Farmer</th>
                 <th className="font-medium px-6 py-3">Mobile</th>
+                <th className="font-medium px-6 py-3">Crop</th>
+                <th className="font-medium px-6 py-3">Date</th>
                 <th className="font-medium px-6 py-3 text-right">Actions</th>
               </tr>
             </thead>
@@ -148,13 +150,18 @@ export default function LiveQueue() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-ink">
-                    {token.farmer?.name || "—"}
+                    <span className="block">{token.farmer?.name || "—"}</span>
+                    <span className="block text-xs text-muted">ID: {token.farmer?._id || "—"}</span>
                   </td>
                   <td className="px-6 py-4 text-muted">
                     <span className="inline-flex items-center gap-1.5">
                       <Phone size={14} />
                       {token.farmer?.mobile || "—"}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 text-muted">{token.farmer?.cropType || "—"}</td>
+                  <td className="px-6 py-4 text-muted">
+                    {token.date ? new Date(token.date).toLocaleDateString("en-IN") : "—"}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex justify-end gap-2">

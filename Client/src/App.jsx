@@ -10,7 +10,6 @@ import ProcurementEntry from "./pages/admin/ProcurementEntry";
 import Payments from "./pages/admin/Payments";
 import Analytics from "./pages/admin/Analytics";
 import Login from "./pages/admin/Login";
-import AdminRegister from "./pages/admin/AdminRegister";
 import FarmerLogin from "./pages/farmer/FarmerLogin";
 import FarmerRegister from "./pages/farmer/FarmerRegister";
 import FarmerHome from "./pages/farmer/FarmerHome";
@@ -27,15 +26,38 @@ import FarmerSettings from "./pages/farmer/FarmerSettings";
 import FarmerHelp from "./pages/farmer/FarmerHelp";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
 
+function getStoredRole() {
+  try {
+    return localStorage.getItem("admin-role") || localStorage.getItem("farmer-role");
+  } catch {
+    return null;
+  }
+}
+
+function getStoredToken() {
+  try {
+    return localStorage.getItem("admin-token") || localStorage.getItem("farmer-token");
+  } catch {
+    return null;
+  }
+}
+
 const App = () => {
   return (
     <BrowserRouter>
       <ToastContainer position="top-right" />
       <Routes>
-        <Route path="/" element={<Navigate to="/admin/mandis" replace />} />
+        <Route path="/" element={
+          (() => {
+            const role = getStoredRole();
+            const token = getStoredToken();
+            if (token && role === "admin") return <Navigate to="/admin/dashboard" replace />;
+            if (token && role === "farmer") return <Navigate to="/farmer" replace />;
+            return <Navigate to="/farmer/welcome" replace />;
+          })()
+        } />
         <Route path="/welcome" element={<Navigate to="/farmer/welcome" replace />} />
         <Route path="/admin/login" element={<Login />} />
-        <Route path="/admin/register" element={<AdminRegister />} />
         <Route path="/admin/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/admin/mandis" element={<ProtectedRoute><MandiManagement /></ProtectedRoute>} />
         <Route path="/admin/farmers" element={<ProtectedRoute><Farmers /></ProtectedRoute>} />
@@ -43,27 +65,33 @@ const App = () => {
         <Route path="/admin/procurement" element={<ProtectedRoute><ProcurementEntry /></ProtectedRoute>} />
         <Route path="/admin/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
         <Route path="/admin/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-        <Route path="/farmer" element={<FarmerHome />} />
+        <Route path="/farmer" element={<FarmerProtected><FarmerHome /></FarmerProtected>} />
         <Route path="/farmer/welcome" element={<FarmerWelcome />} />
         <Route path="/farmer/login" element={<FarmerLogin />} />
         <Route path="/farmer/register" element={<FarmerRegister />} />
-        <Route path="/farmer/book" element={<FarmerBookSlot />} />
-        <Route path="/farmer/queue" element={<FarmerLiveQueue />} />
-        <Route path="/farmer/history" element={<FarmerHistory />} />
-        <Route path="/farmer/procurement/:id" element={<FarmerProcurementDetails />} />
-        <Route path="/farmer/payments" element={<FarmerPayments />} />
-        <Route path="/farmer/payment/:id" element={<FarmerPaymentDetails />} />
-        <Route path="/farmer/notifications" element={<FarmerNotifications />} />
-        <Route path="/farmer/profile" element={<FarmerProfile />} />
-        <Route path="/farmer/settings" element={<FarmerSettings />} />
-        <Route path="/farmer/help" element={<FarmerHelp />} />
-        {/* Farmer-scoped fallback: unknown /farmer/* URLs land on the dashboard
-            instead of rendering a blank page. No /admin/* fallback: every
-            existing Admin page has its own explicit route above. */}
+        <Route path="/farmer/book" element={<FarmerProtected><FarmerBookSlot /></FarmerProtected>} />
+        <Route path="/farmer/queue" element={<FarmerProtected><FarmerLiveQueue /></FarmerProtected>} />
+        <Route path="/farmer/history" element={<FarmerProtected><FarmerHistory /></FarmerProtected>} />
+        <Route path="/farmer/procurement/:id" element={<FarmerProtected><FarmerProcurementDetails /></FarmerProtected>} />
+        <Route path="/farmer/payments" element={<FarmerProtected><FarmerPayments /></FarmerProtected>} />
+        <Route path="/farmer/payment/:id" element={<FarmerProtected><FarmerPaymentDetails /></FarmerProtected>} />
+        <Route path="/farmer/notifications" element={<FarmerProtected><FarmerNotifications /></FarmerProtected>} />
+        <Route path="/farmer/profile" element={<FarmerProtected><FarmerProfile /></FarmerProtected>} />
+        <Route path="/farmer/settings" element={<FarmerProtected><FarmerSettings /></FarmerProtected>} />
+        <Route path="/farmer/help" element={<FarmerProtected><FarmerHelp /></FarmerProtected>} />
         <Route path="/farmer/*" element={<Navigate to="/farmer" replace />} />
       </Routes>
     </BrowserRouter>
   );
+}
+
+function FarmerProtected({ children }) {
+  const token = localStorage.getItem("farmer-token");
+  const role = localStorage.getItem("farmer-role");
+  if (!token || role !== "farmer") {
+    return <Navigate to="/farmer/login" replace />;
+  }
+  return children;
 }
 
 export default App;

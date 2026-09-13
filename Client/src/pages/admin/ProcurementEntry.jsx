@@ -154,6 +154,7 @@ export default function ProcurementEntry() {
                     <p className="text-sm font-semibold">
                       #{token.tokenNumber} · {token.farmer?.name || "—"}
                     </p>
+                    <p className="text-xs text-muted">Farmer ID: {token.farmer?._id || "—"}</p>
                     <p
                       className={`text-xs ${
                         selectedToken?._id === token._id
@@ -162,6 +163,9 @@ export default function ProcurementEntry() {
                       }`}
                     >
                       {token.farmer?.mobile || "—"}
+                    </p>
+                    <p className="text-xs text-muted">
+                      {token.farmer?.cropType || "—"} · {token.date ? new Date(token.date).toLocaleDateString("en-IN") : "—"}
                     </p>
                   </button>
                 ))}
