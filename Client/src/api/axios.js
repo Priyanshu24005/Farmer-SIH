@@ -29,10 +29,12 @@ api.interceptors.response.use(
       "Something went wrong. Please try again.";
 
     if (status === 401) {
-      toast.error("Session expired. Please log in again.");
-      localStorage.removeItem("token");
-      window.location.href = "/farmer/login";
-    } else if (status === 404) {
+  toast.error("Session expired. Please log in again.");
+  const role = JSON.parse(localStorage.getItem("user") || "null")?.role;
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  window.location.href = role === "admin" ? "/admin/login" : "/farmer/login";
+} else if (status === 404) {
       toast.error("Not found: " + message);
     } else if (status >= 500) {
       toast.error("Server error — try again in a moment.");
